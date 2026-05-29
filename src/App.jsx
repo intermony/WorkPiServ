@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import piSDK from './pi.js';
+import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
