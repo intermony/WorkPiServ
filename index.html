@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -7,7 +7,21 @@
     <title>WorkPiServ - Marketplace Freelancer بعملة Pi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script>
+      (function() {
+        try {
+          var script = document.createElement('script');
+          script.src = 'https://sdk.minepi.com/pi-sdk.js';
+          script.async = true;
+          script.onerror = function() {
+            console.warn('Pi SDK not available');
+          };
+          document.head.appendChild(script);
+        } catch(e) {
+          console.warn('Pi SDK load error:', e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
