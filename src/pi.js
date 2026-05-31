@@ -2,7 +2,7 @@
 // يعمل على Sandbox (Testnet) و Mainnet
 
 const APP_ID = import.meta.env.VITE_PI_APP_ID || 'workpiserv';
-const API_URL = 'https://workpiserv-backend.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://workpiserv-api.onrender.com';
 
 class PiSDK {
   constructor() {
@@ -17,10 +17,6 @@ class PiSDK {
     }
 
     try {
-      // Initialize Pi SDK
-      // For Sandbox: Pi.init({ version: "2.0", sandbox: true })
-      // For Mainnet: Pi.init({ version: "2.0" })
-
       const isSandbox = import.meta.env.VITE_PI_SANDBOX === 'true';
 
       window.Pi.init({
@@ -43,9 +39,11 @@ class PiSDK {
 
     try {
       const scopes = ['username', 'payments'];
-      const auth = await window.Pi.authenticate(scopes, this.onIncompletePaymentFound);
+      const auth = await window.Pi.authenticate(
+        scopes,
+        this.onIncompletePaymentFound.bind(this)
+      );
 
-      // Send to our backend to verify and get JWT
       const res = await fetch(`${API_URL}/api/auth/pi`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,34 +76,39 @@ class PiSDK {
     try {
       const payment = await window.Pi.createPayment({
         amount: orderData.amount,
-        memo: orderData.memo || `WorkPiServ Order #${orderData.orderId}`,
+        memo: orderData.memo || `WorkPiServ Order`,
         metadata: {
-          orderId: orderData.orderId,
           serviceId: orderData.serviceId
         }
       }, {
         onReadyForServerApproval: async (paymentId) => {
           console.log('Payment ready for approval:', paymentId);
 
-          // Call backend to approve with Pi servers
+          // ✅ Envoie serviceId et requirements au backend
           const res = await fetch(`${API_URL}/api/payments/approve`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ paymentId })
+            body: JSON.stringify({
+              paymentId,
+              serviceId: orderData.serviceId,
+              requirements: orderData.requirements || ''
+            })
           });
 
+          const data = await res.json();
+          console.log('Approve result:', data);
+
           if (callbacks.onReadyForServerApproval) {
-            callbacks.onReadyForServerApproval(paymentId);
+            callbacks.onReadyForServerApproval(paymentId, data);
           }
         },
 
         onReadyForServerCompletion: async (paymentId, txid) => {
           console.log('Payment ready for completion:', paymentId, txid);
 
-          // Call backend to complete and verify
           const res = await fetch(`${API_URL}/api/payments/complete`, {
             method: 'POST',
             headers: {
@@ -115,8 +118,11 @@ class PiSDK {
             body: JSON.stringify({ paymentId, txid })
           });
 
+          const data = await res.json();
+          console.log('Complete result:', data);
+
           if (callbacks.onReadyForServerCompletion) {
-            callbacks.onReadyForServerCompletion(paymentId, txid);
+            callbacks.onReadyForServerCompletion(paymentId, txid, data);
           }
         },
 
@@ -138,9 +144,21 @@ class PiSDK {
     }
   }
 
-  onIncompletePaymentFound(payment) {
+  // ✅ Gère les paiements incomplets correctement
+  async onIncompletePaymentFound(payment) {
     console.log('Incomplete payment found:', payment);
-    // Handle incomplete payments (optional)
+    try {
+      await fetch(`${API_URL}/api/payments/incomplete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ paymentId: payment.identifier })
+      });
+    } catch (err) {
+      console.error('Incomplete payment error:', err);
+    }
     return Promise.resolve();
   }
 
