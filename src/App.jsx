@@ -101,7 +101,7 @@ const Sidebar = ({ user, currentPath, navigate, lang, T }) => {
 
   return (
     <>
-      // ✅ Nouveau - bouton en haut à GAUCHE
+
 <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="menu"
   style={{right: 'auto', left: '1rem'}}>
   {mobileOpen ? '✕' : '☰'}
