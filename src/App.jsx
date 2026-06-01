@@ -101,9 +101,11 @@ const Sidebar = ({ user, currentPath, navigate, lang, T }) => {
 
   return (
     <>
-      <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="menu">
-        {mobileOpen ? '✕' : '☰'}
-      </button>
+      // ✅ Nouveau - bouton en haut à GAUCHE
+<button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="menu"
+  style={{right: 'auto', left: '1rem'}}>
+  {mobileOpen ? '✕' : '☰'}
+</button>
       <div className={`sidebar-overlay ${mobileOpen ? 'active' : ''}`} onClick={() => setMobileOpen(false)} />
       <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
         <a href="/" onClick={e => { e.preventDefault(); handleNav('/'); }} className="sidebar-logo">
