@@ -1098,3 +1098,28 @@ body {
     width: 260px;
   }
      }
+/* Fix logo sidebar */
+.sidebar-logo {
+  padding-right: 0 !important;
+  overflow: visible !important;
+  width: 100% !important;
+}
+
+/* Fix Mes Commandes sur 1 ligne */
+.sidebar-nav-item span:last-child {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Fix scrollbar */
+html, body, .sidebar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
