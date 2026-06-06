@@ -1,6 +1,3 @@
-// WorkPiServ - Pi Network authentication hook
-// Handles Pi SDK authenticate + backend login in one step
-
 import { useState, useCallback } from 'react';
 import { loginWithPi, logout as apiLogout, isLoggedIn } from '@/lib/api';
 
@@ -14,18 +11,27 @@ interface UsePiAuthReturn {
   loading: boolean;
   error: string | null;
   loggedIn: boolean;
+  inPiBrowser: boolean;
   login: () => Promise<void>;
   logout: () => void;
+}
+
+// Detect if we're inside the Pi Browser
+function detectPiBrowser(): boolean {
+  return typeof window !== 'undefined' && !!window.Pi;
 }
 
 export function usePiAuth(): UsePiAuthReturn {
   const [user, setUser] = useState<PiUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inPiBrowser = detectPiBrowser();
 
   const login = useCallback(async () => {
-    if (!window.Pi) {
-      setError('Pi Network app required. Please open WorkPiServ inside the Pi Browser.');
+    // Not in Pi Browser — show friendly message
+    if (!inPiBrowser) {
+      setError('Please open WorkPiServ inside the Pi Browser app to login.');
+      setTimeout(() => setError(null), 5000); // auto-dismiss after 5s
       return;
     }
 
@@ -33,25 +39,22 @@ export function usePiAuth(): UsePiAuthReturn {
     setError(null);
 
     try {
-      // 1. Authenticate with Pi SDK
-      const auth = await window.Pi.authenticate(
+      const auth = await window.Pi!.authenticate(
         ['username', 'payments'],
         (payment) => {
-          // Handle incomplete payment — send to backend to resolve
           console.warn('Incomplete payment found:', payment);
         }
       );
 
-      // 2. Send Pi credentials to our backend
       await loginWithPi(auth.user.uid, auth.user.username, '');
-
       setUser({ uid: auth.user.uid, username: auth.user.username });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.');
+      setTimeout(() => setError(null), 5000);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [inPiBrowser]);
 
   const logout = useCallback(() => {
     apiLogout();
@@ -63,6 +66,7 @@ export function usePiAuth(): UsePiAuthReturn {
     loading,
     error,
     loggedIn: isLoggedIn() || user !== null,
+    inPiBrowser,
     login,
     logout,
   };
