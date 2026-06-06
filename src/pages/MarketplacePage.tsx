@@ -1,0 +1,367 @@
+import { useState, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Search, ChevronDown, Filter, X, LayoutGrid } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { services } from '@/data/services';
+import { categories } from '@/data/categories';
+import { ServiceCard } from '@/components/shared/ServiceCard';
+import { ScrollReveal } from '@/components/shared/ScrollReveal';
+import { useIsDesktop } from '@/hooks/useMediaQuery';
+
+const sortOptions = [
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'newest', label: 'Newest' },
+  { value: 'price_asc', label: 'Price: Low to High' },
+  { value: 'price_desc', label: 'Price: High to Low' },
+  { value: 'rating', label: 'Best Rating' },
+];
+
+const deliveryOptions = [
+  { value: 'any', label: 'Any time' },
+  { value: '1', label: 'Within 24 hours' },
+  { value: '3', label: 'Within 3 days' },
+  { value: '7', label: 'Within 7 days' },
+  { value: '14', label: 'Within 14 days' },
+];
+
+const ratingOptions = [
+  { value: 'any', label: 'Any rating' },
+  { value: '4.5', label: '4.5 & up' },
+  { value: '4.0', label: '4.0 & up' },
+  { value: '3.0', label: '3.0 & up' },
+];
+
+export default function MarketplacePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isDesktop = useIsDesktop();
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const searchQuery = searchParams.get('q') || '';
+  const activeCategory = searchParams.get('category') || '';
+  const activeSort = searchParams.get('sort') || 'popular';
+  const activeDelivery = searchParams.get('delivery') || 'any';
+  const activeRating = searchParams.get('rating') || 'any';
+
+  const filteredServices = useMemo(() => {
+    let result = [...services];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(s =>
+        s.title.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q) ||
+        s.freelancer.name.toLowerCase().includes(q)
+      );
+    }
+
+    if (activeCategory) {
+      result = result.filter(s => s.category === activeCategory);
+    }
+
+    if (activeDelivery !== 'any') {
+      const days = parseInt(activeDelivery);
+      result = result.filter(s => s.deliveryDays <= days);
+    }
+
+    if (activeRating !== 'any') {
+      const min = parseFloat(activeRating);
+      result = result.filter(s => s.rating >= min);
+    }
+
+    switch (activeSort) {
+      case 'price_asc':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        break;
+    }
+
+    return result;
+  }, [searchQuery, activeCategory, activeSort, activeDelivery, activeRating]);
+
+  const updateParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== 'any') {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setSearchParams(new URLSearchParams());
+  };
+
+  const hasFilters = activeCategory || activeDelivery !== 'any' || activeRating !== 'any';
+
+  const FilterSidebar = () => (
+    <div className="space-y-6">
+      {/* Categories */}
+      <div>
+        <h3 className="font-semibold text-navy mb-4">Categories</h3>
+        <div className="space-y-1">
+          <button
+            onClick={() => updateParam('category', '')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              !activeCategory ? 'bg-brand-light text-brand font-medium' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <LayoutGrid size={18} />
+            All Services
+            <span className="ml-auto text-xs text-gray-400">{services.length}</span>
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => updateParam('category', cat.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors capitalize ${
+                activeCategory === cat.id ? 'bg-brand-light text-brand font-medium' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <span className="capitalize">{cat.name}</span>
+              <span className="ml-auto text-xs text-gray-400">{cat.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Delivery Time */}
+      <div>
+        <h3 className="font-semibold text-navy mb-4">Delivery Time</h3>
+        <div className="space-y-2">
+          {deliveryOptions.map(opt => (
+            <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                name="delivery"
+                value={opt.value}
+                checked={activeDelivery === opt.value}
+                onChange={(e) => updateParam('delivery', e.target.value)}
+                className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
+              />
+              <span className="text-sm text-gray-600">{opt.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Rating */}
+      <div>
+        <h3 className="font-semibold text-navy mb-4">Minimum Rating</h3>
+        <div className="space-y-2">
+          {ratingOptions.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => updateParam('rating', opt.value)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                activeRating === opt.value ? 'bg-brand-light text-brand' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {opt.value !== 'any' && (
+                <span className="flex items-center gap-0.5">
+                  {opt.value} ★
+                </span>
+              )}
+              {opt.value === 'any' && 'Any rating'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {hasFilters && (
+        <button
+          onClick={clearFilters}
+          className="btn-secondary w-full text-sm flex items-center justify-center gap-2"
+        >
+          <X size={16} />
+          Reset All Filters
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <main className="min-h-screen pb-20">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="section-container py-8">
+          <ScrollReveal>
+            <div className="text-sm text-gray-500 mb-2">
+              <Link to="/" className="text-brand hover:underline">Home</Link>
+              <span className="mx-2">/</span>
+              <span>Marketplace</span>
+            </div>
+            <h1 className="font-heading font-bold text-3xl text-navy">Browse Services</h1>
+          </ScrollReveal>
+
+          {/* Search Bar */}
+          <ScrollReveal delay={0.1}>
+            <div className="mt-6 max-w-2xl">
+              <div className="flex">
+                <div className="flex-1 relative">
+                  <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search services, freelancers..."
+                    value={searchQuery}
+                    onChange={(e) => updateParam('q', e.target.value)}
+                    className="w-full h-[52px] pl-12 pr-4 border border-gray-200 rounded-l-full text-base focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
+                  />
+                </div>
+                <button className="btn-primary rounded-l-none rounded-r-full h-[52px] px-7">
+                  Search
+                </button>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Quick Filters */}
+          <ScrollReveal delay={0.15}>
+            <div className="flex flex-wrap gap-2 mt-4">
+              <button
+                onClick={() => updateParam('category', '')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  !activeCategory ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                All
+              </button>
+              {categories.slice(0, 6).map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => updateParam('category', activeCategory === cat.id ? '' : cat.id)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
+                    activeCategory === cat.id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </ScrollReveal>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="section-container py-8">
+        <div className="flex gap-8">
+          {/* Sidebar - Desktop */}
+          {isDesktop && (
+            <aside className="w-[260px] shrink-0">
+              <div className="sticky top-24 card-surface p-5">
+                <FilterSidebar />
+              </div>
+            </aside>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
+            {/* Sort Bar */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-gray-500">
+                Showing {filteredServices.length} of {services.length} services
+              </p>
+              <div className="relative">
+                {!isDesktop && (
+                  <button
+                    onClick={() => setMobileFilterOpen(true)}
+                    className="btn-secondary text-sm py-2 px-4 flex items-center gap-2 mr-2"
+                  >
+                    <Filter size={16} />
+                    Filters
+                  </button>
+                )}
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-navy transition-colors bg-white border border-gray-200 rounded-lg px-4 py-2"
+                >
+                  {sortOptions.find(o => o.value === activeSort)?.label}
+                  <ChevronDown size={16} />
+                </button>
+                <AnimatePresence>
+                  {sortOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-20 min-w-[180px]"
+                    >
+                      {sortOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => { updateParam('sort', opt.value); setSortOpen(false); }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
+                            activeSort === opt.value ? 'text-brand font-medium' : 'text-gray-600'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Service Grid */}
+            {filteredServices.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredServices.map((service, index) => (
+                  <ServiceCard key={service.id} service={service} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <Search size={48} className="text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700">No services found</h3>
+                <p className="text-gray-500 mt-2">Try adjusting your filters or search query</p>
+                <button onClick={clearFilters} className="btn-primary mt-4">
+                  Clear Filters
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      <AnimatePresence>
+        {mobileFilterOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-50"
+              onClick={() => setMobileFilterOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: '20%' }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl p-6 overflow-y-auto"
+              style={{ maxHeight: '80vh' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-semibold text-navy text-lg">Filters</h3>
+                <button onClick={() => setMobileFilterOpen(false)} className="p-2 rounded-lg hover:bg-gray-100">
+                  <X size={20} />
+                </button>
+              </div>
+              <FilterSidebar />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </main>
+  );
+}

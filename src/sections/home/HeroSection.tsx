@@ -1,0 +1,75 @@
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#FFF5F0] via-[#F8F0FF] to-[#F0F4FF] rounded-b-[32px]">
+      {/* Decorative elements */}
+      <div className="absolute top-10 left-10 w-[300px] h-[300px] bg-brand/8 rounded-full blur-[80px]" />
+      <div className="absolute bottom-10 right-10 w-[250px] h-[250px] bg-escrow/6 rounded-full blur-[80px]" />
+      
+      {/* Floating Pi Symbol */}
+      <motion.div
+        className="absolute right-[10%] top-[20%] hidden lg:block"
+        animate={{ y: [-8, 8] }}
+        transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+      >
+        <span className="text-[200px] font-heading font-bold text-brand/10 select-none">π</span>
+      </motion.div>
+
+      <div className="section-container relative z-10 py-20 lg:py-32">
+        <div className="max-w-xl">
+          {/* Testnet Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse-dot" />
+              Testnet Active
+            </span>
+          </motion.div>
+
+          {/* Title */}
+          <motion.h1
+            className="font-heading font-bold text-4xl lg:text-5xl text-navy leading-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            Get Your Work Done Safely{' '}
+            <span className="text-brand">with Pi π</span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            className="mt-5 text-lg text-gray-500 leading-relaxed max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+          >
+            The first Arabic & global secure freelance platform powered by Pi. Connecting talent with opportunity through our smart Escrow system.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row gap-3 mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <Link to="/marketplace" className="btn-primary inline-flex items-center justify-center gap-2 text-base py-3.5 px-7">
+              Explore Services
+              <ArrowRight size={18} />
+            </Link>
+            <Link to="#" className="btn-secondary inline-flex items-center justify-center text-base py-3.5 px-7">
+              Join as Freelancer
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}

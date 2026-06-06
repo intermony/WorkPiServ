@@ -1,0 +1,209 @@
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, ShoppingCart, Package, MessageCircle, Bell, Search, Menu, X } from 'lucide-react';
+import { useIsDesktop, useIsMobile } from '@/hooks/useMediaQuery';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const navItems = [
+  { label: 'Home', icon: Home, href: '/' },
+  { label: 'Marketplace', icon: ShoppingCart, href: '/marketplace' },
+  { label: 'My Orders', icon: Package, href: '/orders' },
+  { label: 'Messages', icon: MessageCircle, href: '#' },
+];
+
+export function Header() {
+  const location = useLocation();
+  const isDesktop = useIsDesktop();
+  const isMobile = useIsMobile();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [location.pathname]);
+
+  return (
+    <>
+      <header
+        className={`sticky top-0 z-50 bg-white border-b border-gray-200 transition-shadow duration-200 ${
+          scrolled ? 'shadow-nav' : ''
+        }`}
+      >
+        <div className="section-container">
+          <div className="flex items-center justify-between h-16">
+            {/* Left - Mobile Menu or Logo */}
+            {isMobile ? (
+              <button
+                onClick={() => setMobileDrawerOpen(true)}
+                className="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Open menu"
+              >
+                <Menu size={24} className="text-navy" />
+              </button>
+            ) : null}
+
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2 shrink-0">
+              <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm">π</span>
+              </div>
+              <span className="font-heading font-bold text-lg text-navy">
+                Work<span className="text-brand">π</span>Serv
+              </span>
+            </Link>
+
+            {/* Desktop Nav */}
+            {isDesktop && (
+              <nav className="flex items-center gap-1">
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
+                  return (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'text-brand bg-brand-light'
+                          : 'text-gray-500 hover:text-brand hover:bg-gray-50'
+                      }`}
+                    >
+                      <item.icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Search"
+              >
+                <Search size={20} className="text-gray-500" />
+              </button>
+
+              {/* Notification */}
+              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative hidden sm:block" aria-label="Notifications">
+                <Bell size={20} className="text-gray-500" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+
+              {/* Login */}
+              <Link
+                to="#"
+                className="btn-primary text-sm py-2 px-5 hidden sm:inline-flex"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Search Overlay */}
+        <AnimatePresence>
+          {searchOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="border-t border-gray-100 bg-white overflow-hidden"
+            >
+              <div className="section-container py-4">
+                <div className="flex items-center gap-3 max-w-2xl mx-auto">
+                  <Search size={20} className="text-gray-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search services, freelancers..."
+                    className="flex-1 bg-transparent text-lg outline-none placeholder:text-gray-400"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => setSearchOpen(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <X size={20} className="text-gray-400" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {mobileDrawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-50"
+              onClick={() => setMobileDrawerOpen(false)}
+            />
+            <motion.div
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed left-0 top-0 bottom-0 w-[280px] bg-white z-50 shadow-xl"
+            >
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-6">
+                  <Link to="/" className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">π</span>
+                    </div>
+                    <span className="font-heading font-bold text-lg text-navy">
+                      Work<span className="text-brand">π</span>Serv
+                    </span>
+                  </Link>
+                  <button
+                    onClick={() => setMobileDrawerOpen(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <nav className="space-y-1">
+                  {navItems.map((item) => {
+                    const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
+                    return (
+                      <Link
+                        key={item.label}
+                        to={item.href}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+                          isActive ? 'text-brand bg-brand-light' : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        <item.icon size={20} />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <Link to="#" className="btn-primary w-full text-center block">
+                    Login
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
