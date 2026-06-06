@@ -133,7 +133,7 @@ class PiSDK {
     }
   }
 
-  async onIncompletePaymentFound(payment: { identifier: string }) {
+  async onIncompletePaymentFound(payment: unknown) {
     console.log('Incomplete payment found:', payment);
     try {
       await fetch(`${API_URL}/api/payments/incomplete`, {
@@ -142,7 +142,7 @@ class PiSDK {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('workpiserv_token')}`
         },
-        body: JSON.stringify({ paymentId: payment.identifier })
+        body: JSON.stringify({ paymentId: (payment as { identifier: string }).identifier })
       });
     } catch (err) {
       console.error('Incomplete payment error:', err);
