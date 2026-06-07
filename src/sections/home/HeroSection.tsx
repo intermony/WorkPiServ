@@ -26,9 +26,9 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <span className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
+            <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse-dot" />
-              Testnet Active
+              ✓ Mainnet · Pi Network Secured
             </span>
           </motion.div>
 
@@ -72,4 +72,5 @@ export function HeroSection() {
       </div>
     </section>
   );
-}
+      }
+            
