@@ -1,12 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, ChevronDown, Filter, X, LayoutGrid } from 'lucide-react';
+import { Search, ChevronDown, Filter, X, LayoutGrid, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { services } from '@/data/services';
+import { services as mockServices } from '@/data/services';
 import { categories } from '@/data/categories';
 import { ServiceCard } from '@/components/shared/ServiceCard';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { useIsDesktop } from '@/hooks/useMediaQuery';
+import type { Service } from '@/types';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
 const sortOptions = [
   { value: 'popular', label: 'Most Popular' },
@@ -37,26 +40,74 @@ export default function MarketplacePage() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
 
+  // Backend state
+  const [apiServices, setApiServices] = useState<Service[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [usingMock, setUsingMock] = useState(false);
+
   const searchQuery = searchParams.get('q') || '';
   const activeCategory = searchParams.get('category') || '';
   const activeSort = searchParams.get('sort') || 'popular';
   const activeDelivery = searchParams.get('delivery') || 'any';
   const activeRating = searchParams.get('rating') || 'any';
 
-  const filteredServices = useMemo(() => {
-    let result = [...services];
+  // Fetch services from backend
+  const fetchServices = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (activeCategory) params.set('category', activeCategory);
+      if (searchQuery) params.set('q', searchQuery);
+      if (activeSort) params.set('sort', activeSort);
 
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(s =>
-        s.title.toLowerCase().includes(q) ||
-        s.category.toLowerCase().includes(q) ||
-        s.freelancer.name.toLowerCase().includes(q)
-      );
+      const res = await fetch(`${API_URL}/api/services?${params}`);
+      if (res.ok) {
+        const data = await res.json();
+        const list: Service[] = Array.isArray(data) ? data : data.services || [];
+        if (list.length > 0) {
+          setApiServices(list);
+          setUsingMock(false);
+        } else {
+          // Backend returned empty — fall back to mocks
+          setApiServices(null);
+          setUsingMock(true);
+        }
+      } else {
+        setApiServices(null);
+        setUsingMock(true);
+      }
+    } catch {
+      setApiServices(null);
+      setUsingMock(true);
+    } finally {
+      setLoading(false);
     }
+  }, [activeCategory, searchQuery, activeSort]);
 
-    if (activeCategory) {
-      result = result.filter(s => s.category === activeCategory);
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
+
+  // Source: real API or mock fallback
+  const allServices: Service[] = apiServices ?? mockServices;
+
+  // Client-side filtering (applied on top of API results or mocks)
+  const filteredServices = useMemo(() => {
+    let result = [...allServices];
+
+    // Only filter client-side if using mocks (API already filters)
+    if (usingMock || apiServices === null) {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        result = result.filter(s =>
+          s.title.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q) ||
+          s.freelancer.name.toLowerCase().includes(q)
+        );
+      }
+      if (activeCategory) {
+        result = result.filter(s => s.category === activeCategory);
+      }
     }
 
     if (activeDelivery !== 'any') {
@@ -69,22 +120,18 @@ export default function MarketplacePage() {
       result = result.filter(s => s.rating >= min);
     }
 
-    switch (activeSort) {
-      case 'price_asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        break;
+    // Client-side sort (mocks only — API handles sort)
+    if (usingMock || apiServices === null) {
+      switch (activeSort) {
+        case 'price_asc': result.sort((a, b) => a.price - b.price); break;
+        case 'price_desc': result.sort((a, b) => b.price - a.price); break;
+        case 'rating': result.sort((a, b) => b.rating - a.rating); break;
+        default: break;
+      }
     }
 
     return result;
-  }, [searchQuery, activeCategory, activeSort, activeDelivery, activeRating]);
+  }, [allServices, searchQuery, activeCategory, activeSort, activeDelivery, activeRating, usingMock, apiServices]);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -96,9 +143,7 @@ export default function MarketplacePage() {
     setSearchParams(params);
   };
 
-  const clearFilters = () => {
-    setSearchParams(new URLSearchParams());
-  };
+  const clearFilters = () => setSearchParams(new URLSearchParams());
 
   const hasFilters = activeCategory || activeDelivery !== 'any' || activeRating !== 'any';
 
@@ -116,7 +161,7 @@ export default function MarketplacePage() {
           >
             <LayoutGrid size={18} />
             All Services
-            <span className="ml-auto text-xs text-gray-400">{services.length}</span>
+            <span className="ml-auto text-xs text-gray-400">{allServices.length}</span>
           </button>
           {categories.map(cat => (
             <button
@@ -165,24 +210,15 @@ export default function MarketplacePage() {
                 activeRating === opt.value ? 'bg-brand-light text-brand' : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              {opt.value !== 'any' && (
-                <span className="flex items-center gap-0.5">
-                  {opt.value} ★
-                </span>
-              )}
-              {opt.value === 'any' && 'Any rating'}
+              {opt.value !== 'any' ? <span>{opt.value} ★</span> : 'Any rating'}
             </button>
           ))}
         </div>
       </div>
 
       {hasFilters && (
-        <button
-          onClick={clearFilters}
-          className="btn-secondary w-full text-sm flex items-center justify-center gap-2"
-        >
-          <X size={16} />
-          Reset All Filters
+        <button onClick={clearFilters} className="btn-secondary w-full text-sm flex items-center justify-center gap-2">
+          <X size={16} /> Reset All Filters
         </button>
       )}
     </div>
@@ -250,6 +286,16 @@ export default function MarketplacePage() {
         </div>
       </div>
 
+      {/* Mock data notice */}
+      {usingMock && !loading && (
+        <div className="section-container pt-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-sm text-amber-700 flex items-center justify-between">
+            <span>Showing demo services — real services will appear once published.</span>
+            <button onClick={fetchServices} className="underline text-xs ml-4 shrink-0">Retry</button>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
       <div className="section-container py-8">
         <div className="flex gap-8">
@@ -267,16 +313,17 @@ export default function MarketplacePage() {
             {/* Sort Bar */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-gray-500">
-                Showing {filteredServices.length} of {services.length} services
+                {loading
+                  ? 'Loading services...'
+                  : `Showing ${filteredServices.length} of ${allServices.length} services`}
               </p>
-              <div className="relative">
+              <div className="flex items-center gap-2 relative">
                 {!isDesktop && (
                   <button
                     onClick={() => setMobileFilterOpen(true)}
-                    className="btn-secondary text-sm py-2 px-4 flex items-center gap-2 mr-2"
+                    className="btn-secondary text-sm py-2 px-4 flex items-center gap-2"
                   >
-                    <Filter size={16} />
-                    Filters
+                    <Filter size={16} /> Filters
                   </button>
                 )}
                 <button
@@ -311,8 +358,15 @@ export default function MarketplacePage() {
               </div>
             </div>
 
-            {/* Service Grid */}
-            {filteredServices.length > 0 ? (
+            {/* Loading */}
+            {loading ? (
+              <div className="flex items-center justify-center min-h-[300px]">
+                <div className="text-center">
+                  <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
+                  <p className="text-gray-500 text-sm">Loading services...</p>
+                </div>
+              </div>
+            ) : filteredServices.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredServices.map((service, index) => (
                   <ServiceCard key={service.id} service={service} index={index} />
@@ -323,9 +377,7 @@ export default function MarketplacePage() {
                 <Search size={48} className="text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-700">No services found</h3>
                 <p className="text-gray-500 mt-2">Try adjusting your filters or search query</p>
-                <button onClick={clearFilters} className="btn-primary mt-4">
-                  Clear Filters
-                </button>
+                <button onClick={clearFilters} className="btn-primary mt-4">Clear Filters</button>
               </div>
             )}
           </div>
