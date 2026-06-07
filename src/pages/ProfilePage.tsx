@@ -131,7 +131,9 @@ export default function ProfilePage() {
     { value: profile?.yearsExp || '—', label: 'Years', icon: Calendar },
   ];
 
-  const myServices = services.filter(s => s.freelancer.username === username);
+  const myServices = services.filter(s =>
+  (s.freelancer.username ?? s.freelancer.id) === username
+);
 
   return (
     <main className="min-h-screen pb-20">
