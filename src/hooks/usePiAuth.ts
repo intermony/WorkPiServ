@@ -16,28 +16,22 @@ interface UsePiAuthReturn {
   logout: () => void;
 }
 
-function getPiBrowserMessage(): string {
-  const lang = navigator.language?.toLowerCase() || 'en';
-  if (lang.startsWith('ar')) return 'افتح WorkPiServ في تطبيق Pi Browser لتسجيل الدخول والمعاملات الحقيقية';
-  if (lang.startsWith('fr')) return 'Ouvrez WorkPiServ dans Pi Browser pour vous connecter et effectuer de vraies transactions';
-  return 'Open WorkPiServ in the Pi Browser app to login and make real transactions';
-}
-
 export function usePiAuth(): UsePiAuthReturn {
   const [user, setUser] = useState<PiUser | null>(() => {
-    // Restore user from localStorage on page reload
-    const saved = localStorage.getItem('workpiserv_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('workpiserv_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Detected at click time, not render time — avoids timeout
   const inPiBrowser = isPiBrowser();
 
   const login = useCallback(async () => {
     if (!inPiBrowser) {
-      setError(getPiBrowserMessage());
-      setTimeout(() => setError(null), 6000);
+      // Show modal — handled in Header
       return;
     }
 
@@ -75,3 +69,4 @@ export function usePiAuth(): UsePiAuthReturn {
     logout,
   };
 }
+  
