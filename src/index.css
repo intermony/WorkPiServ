@@ -92,3 +92,22 @@
     display: none;
   }
 }
+export interface Freelancer {
+  id: string;
+  username?: string; // ← ajouter cette ligne
+  name: string;
+  avatar?: string;
+  title?: string;
+  verified?: boolean;
+  location?: string;
+  memberSince?: string;
+  rating?: number;
+  orders?: number;
+  completion?: string;
+  responseTime?: string;
+  yearsExp?: number;
+  bio?: string;
+  skills?: string[];
+  languages?: { flag: string; name: string; level: string }[];
+  online?: boolean;
+}
