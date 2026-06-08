@@ -1,19 +1,38 @@
+import { useState, useEffect } from 'react';
 import CountUp from 'react-countup';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 
-// WorkPiServ stats - updated as platform grows
-const stats = [
-  { value: 120, suffix: '+', label: 'Services Available' },
-  { value: 85, suffix: '+', label: 'Active Freelancers' },
-  { value: 200, suffix: '+', label: 'Pi Transactions Secured' },
-];
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
+
+interface Stats {
+  services: number;
+  freelancers: number;
+  transactions: number;
+}
 
 export function StatsBar() {
+  const [stats, setStats] = useState<Stats>({ services: 0, freelancers: 0, transactions: 0 });
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/stats`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) setStats(data);
+      })
+      .catch(() => {/* silently keep 0s */});
+  }, []);
+
+  const items = [
+    { value: stats.services,     suffix: '+', label: 'Services Available' },
+    { value: stats.freelancers,  suffix: '+', label: 'Active Freelancers' },
+    { value: stats.transactions, suffix: '+', label: 'Pi Transactions Secured' },
+  ];
+
   return (
     <section className="py-6">
       <div className="section-container">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {stats.map((stat, index) => (
+          {items.map((stat, index) => (
             <ScrollReveal key={stat.label} delay={index * 0.1}>
               <div className="card-surface p-6 text-center">
                 <div className="text-3xl font-bold text-brand font-heading">
