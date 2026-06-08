@@ -11,19 +11,19 @@ import type { Service } from '@/types';
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
 const sortOptions = [
-  { value: 'popular', label: 'Most Popular' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'price_asc', label: 'Price: Low to High' },
+  { value: 'popular',    label: 'Most Popular' },
+  { value: 'newest',     label: 'Newest' },
+  { value: 'price_asc',  label: 'Price: Low to High' },
   { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'rating', label: 'Best Rating' },
+  { value: 'rating',     label: 'Best Rating' },
 ];
 
 const deliveryOptions = [
   { value: 'any', label: 'Any time' },
-  { value: '1', label: 'Within 24 hours' },
-  { value: '3', label: 'Within 3 days' },
-  { value: '7', label: 'Within 7 days' },
-  { value: '14', label: 'Within 14 days' },
+  { value: '1',   label: 'Within 24 hours' },
+  { value: '3',   label: 'Within 3 days' },
+  { value: '7',   label: 'Within 7 days' },
+  { value: '14',  label: 'Within 14 days' },
 ];
 
 const ratingOptions = [
@@ -70,7 +70,7 @@ export default function MarketplacePage() {
   const isDesktop = useIsDesktop();
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [sortOpen, setSortOpen]                 = useState(false);
-  const [apiServices, setApiServices]           = useState<Service[]>([]);
+  const [allServices, setAllServices]           = useState<Service[]>([]);
   const [loading, setLoading]                   = useState(true);
   const [error, setError]                       = useState(false);
 
@@ -80,44 +80,55 @@ export default function MarketplacePage() {
   const activeDelivery = searchParams.get('delivery') || 'any';
   const activeRating   = searchParams.get('rating')   || 'any';
 
+  // Fetch ALL services (no category filter in URL) to compute sidebar counts
   const fetchServices = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
       const params = new URLSearchParams();
-      if (activeCategory) params.set('category', activeCategory);
-      if (searchQuery)    params.set('q', searchQuery);
-      if (activeSort)     params.set('sort', activeSort);
+      if (searchQuery) params.set('q', searchQuery);
+      if (activeSort)  params.set('sort', activeSort);
 
       const res = await fetch(`${API_URL}/api/services?${params}`);
       if (res.ok) {
         const data = await res.json();
         const raw: unknown[] = Array.isArray(data) ? data : data.services || [];
-        setApiServices(raw.map(normalizeApiService));
+        setAllServices(raw.map(normalizeApiService));
       } else {
         setError(true);
-        setApiServices([]);
+        setAllServices([]);
       }
     } catch {
       setError(true);
-      setApiServices([]);
+      setAllServices([]);
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, searchQuery, activeSort]);
+  }, [searchQuery, activeSort]);
 
   useEffect(() => { fetchServices(); }, [fetchServices]);
 
-  const filteredServices = useMemo(() => {
-    let result = [...apiServices];
+  // Compute real counts per category from API data
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of allServices) {
+      counts[s.category] = (counts[s.category] || 0) + 1;
+    }
+    return counts;
+  }, [allServices]);
 
+  // Apply filters client-side
+  const filteredServices = useMemo(() => {
+    let result = [...allServices];
+
+    if (activeCategory) {
+      result = result.filter(s => s.category === activeCategory);
+    }
     if (activeDelivery !== 'any') {
-      const days = parseInt(activeDelivery);
-      result = result.filter(s => s.deliveryDays <= days);
+      result = result.filter(s => s.deliveryDays <= parseInt(activeDelivery));
     }
     if (activeRating !== 'any') {
-      const min = parseFloat(activeRating);
-      result = result.filter(s => s.rating >= min);
+      result = result.filter(s => s.rating >= parseFloat(activeRating));
     }
     switch (activeSort) {
       case 'price_asc':  result.sort((a, b) => a.price - b.price); break;
@@ -127,7 +138,7 @@ export default function MarketplacePage() {
     }
 
     return result;
-  }, [apiServices, activeDelivery, activeRating, activeSort]);
+  }, [allServices, activeCategory, activeDelivery, activeRating, activeSort]);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -151,7 +162,7 @@ export default function MarketplacePage() {
           >
             <LayoutGrid size={18} />
             All Services
-            <span className="ml-auto text-xs text-gray-400">{apiServices.length}</span>
+            <span className="ml-auto text-xs text-gray-400">{allServices.length}</span>
           </button>
           {categories.map(cat => (
             <button
@@ -162,7 +173,9 @@ export default function MarketplacePage() {
               }`}
             >
               <span className="capitalize">{cat.name}</span>
-              <span className="ml-auto text-xs text-gray-400">{cat.count}</span>
+              <span className="ml-auto text-xs text-gray-400">
+                {categoryCounts[cat.id] || 0}
+              </span>
             </button>
           ))}
         </div>
@@ -294,7 +307,7 @@ export default function MarketplacePage() {
               <p className="text-sm text-gray-500">
                 {loading
                   ? 'Loading services...'
-                  : `Showing ${filteredServices.length} of ${apiServices.length} services`}
+                  : `Showing ${filteredServices.length} of ${allServices.length} services`}
               </p>
               <div className="flex items-center gap-2 relative">
                 {!isDesktop && (
