@@ -122,7 +122,6 @@ export default function ProfilePage() {
   const balance = profile?.balance || 0;
   const skills = profile?.skills || [];
   const languages = profile?.languages || [];
-  const avatarInitial = username.charAt(0).toUpperCase();
 
   const stats = [
     { value: rating > 0 ? rating.toFixed(1) : '—', label: 'Rating', icon: Star },
@@ -133,8 +132,8 @@ export default function ProfilePage() {
   ];
 
   const myServices = services.filter(s =>
-  (s.freelancer.username ?? s.freelancer.id) === username
-);
+    (s.freelancer.username ?? s.freelancer.id) === username
+  );
 
   return (
     <main className="min-h-screen pb-20">
@@ -146,36 +145,34 @@ export default function ProfilePage() {
           <div className="card-surface p-6 shadow-lg">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Avatar */}
-<div className="-mt-20 md:-mt-24 mx-auto md:mx-0">
-  <AvatarUpload
-    currentAvatar={profile?.avatar}
-    username={username}
-    displayName={displayName}
-    onUpload={async (file) => {
-      const token = localStorage.getItem('workpiserv_token');
-      if (!token) throw new Error('Non authentifié');
+              <div className="-mt-20 md:-mt-24 mx-auto md:mx-0">
+                <AvatarUpload
+                  currentAvatar={profile?.avatar}
+                  username={username}
+                  displayName={displayName}
+                  onUpload={async (file) => {
+                    const token = localStorage.getItem('workpiserv_token');
+                    if (!token) throw new Error('Non authentifié');
 
-      const formData = new FormData();
-      formData.append('avatar', file);
+                    const formData = new FormData();
+                    formData.append('avatar', file);
 
-      const res = await fetch(`${API_URL}/api/users/avatar`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
+                    const res = await fetch(`${API_URL}/api/users/avatar`, {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                      body: formData,
+                    });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Upload failed');
-      }
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({}));
+                      throw new Error(err.message || 'Upload failed');
+                    }
 
-      const data = await res.json();
-      // Met à jour le state local pour afficher le nouvel avatar immédiatement
-      setProfile(prev => prev ? { ...prev, avatar: data.avatarUrl } : prev);
-    }}
-  />
-</div>
-      
+                    const data = await res.json();
+                    setProfile(prev => prev ? { ...prev, avatar: data.avatarUrl } : prev);
+                  }}
+                />
+              </div>
 
               {/* Info */}
               <div className="flex-1 text-center md:text-left">
@@ -358,4 +355,4 @@ export default function ProfilePage() {
       </div>
     </main>
   );
-                                }
+    }
