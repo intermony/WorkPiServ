@@ -85,5 +85,4 @@ export function AvatarUpload({ currentAvatar, username, displayName, onUpload }:
       />
     </div>
   );
-      }
-            
+    }
