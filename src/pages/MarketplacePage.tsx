@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ChevronDown, Filter, X, LayoutGrid, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { services as mockServices } from '@/data/services';
 import { categories } from '@/data/categories';
 import { ServiceCard } from '@/components/shared/ServiceCard';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
@@ -34,7 +33,6 @@ const ratingOptions = [
   { value: '3.0', label: '3.0 & up' },
 ];
 
-// Normalise un service venant de l'API backend vers le type Service frontend
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeApiService(s: any): Service {
   const freelancerId = s.freelancerId || {};
@@ -71,20 +69,20 @@ export default function MarketplacePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isDesktop = useIsDesktop();
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
+  const [sortOpen, setSortOpen]                 = useState(false);
+  const [apiServices, setApiServices]           = useState<Service[]>([]);
+  const [loading, setLoading]                   = useState(true);
+  const [error, setError]                       = useState(false);
 
-  const [apiServices, setApiServices] = useState<Service[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [usingMock, setUsingMock] = useState(false);
-
-  const searchQuery    = searchParams.get('q') || '';
+  const searchQuery    = searchParams.get('q')        || '';
   const activeCategory = searchParams.get('category') || '';
-  const activeSort     = searchParams.get('sort') || 'popular';
+  const activeSort     = searchParams.get('sort')     || 'popular';
   const activeDelivery = searchParams.get('delivery') || 'any';
-  const activeRating   = searchParams.get('rating') || 'any';
+  const activeRating   = searchParams.get('rating')   || 'any';
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const params = new URLSearchParams();
       if (activeCategory) params.set('category', activeCategory);
@@ -95,77 +93,45 @@ export default function MarketplacePage() {
       if (res.ok) {
         const data = await res.json();
         const raw: unknown[] = Array.isArray(data) ? data : data.services || [];
-        if (raw.length > 0) {
-          setApiServices(raw.map(normalizeApiService));
-          setUsingMock(false);
-        } else {
-          setApiServices(null);
-          setUsingMock(true);
-        }
+        setApiServices(raw.map(normalizeApiService));
       } else {
-        setApiServices(null);
-        setUsingMock(true);
+        setError(true);
+        setApiServices([]);
       }
     } catch {
-      setApiServices(null);
-      setUsingMock(true);
+      setError(true);
+      setApiServices([]);
     } finally {
       setLoading(false);
     }
   }, [activeCategory, searchQuery, activeSort]);
 
-  useEffect(() => {
-    fetchServices();
-  }, [fetchServices]);
-
-  const allServices: Service[] = apiServices ?? mockServices;
+  useEffect(() => { fetchServices(); }, [fetchServices]);
 
   const filteredServices = useMemo(() => {
-    let result = [...allServices];
-
-    if (usingMock || apiServices === null) {
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        result = result.filter(s =>
-          s.title.toLowerCase().includes(q) ||
-          s.category.toLowerCase().includes(q) ||
-          s.freelancer.name.toLowerCase().includes(q)
-        );
-      }
-      if (activeCategory) {
-        result = result.filter(s => s.category === activeCategory);
-      }
-    }
+    let result = [...apiServices];
 
     if (activeDelivery !== 'any') {
       const days = parseInt(activeDelivery);
       result = result.filter(s => s.deliveryDays <= days);
     }
-
     if (activeRating !== 'any') {
       const min = parseFloat(activeRating);
       result = result.filter(s => s.rating >= min);
     }
-
-    if (usingMock || apiServices === null) {
-      switch (activeSort) {
-        case 'price_asc':  result.sort((a, b) => a.price - b.price); break;
-        case 'price_desc': result.sort((a, b) => b.price - a.price); break;
-        case 'rating':     result.sort((a, b) => b.rating - a.rating); break;
-        default: break;
-      }
+    switch (activeSort) {
+      case 'price_asc':  result.sort((a, b) => a.price - b.price); break;
+      case 'price_desc': result.sort((a, b) => b.price - a.price); break;
+      case 'rating':     result.sort((a, b) => b.rating - a.rating); break;
+      default: break;
     }
 
     return result;
-  }, [allServices, searchQuery, activeCategory, activeSort, activeDelivery, activeRating, usingMock, apiServices]);
+  }, [apiServices, activeDelivery, activeRating, activeSort]);
 
   const updateParam = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
-    if (value && value !== 'any') {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
+    if (value && value !== 'any') { params.set(key, value); } else { params.delete(key); }
     setSearchParams(params);
   };
 
@@ -185,7 +151,7 @@ export default function MarketplacePage() {
           >
             <LayoutGrid size={18} />
             All Services
-            <span className="ml-auto text-xs text-gray-400">{allServices.length}</span>
+            <span className="ml-auto text-xs text-gray-400">{apiServices.length}</span>
           </button>
           {categories.map(cat => (
             <button
@@ -208,9 +174,7 @@ export default function MarketplacePage() {
           {deliveryOptions.map(opt => (
             <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
               <input
-                type="radio"
-                name="delivery"
-                value={opt.value}
+                type="radio" name="delivery" value={opt.value}
                 checked={activeDelivery === opt.value}
                 onChange={(e) => updateParam('delivery', e.target.value)}
                 className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
@@ -227,9 +191,7 @@ export default function MarketplacePage() {
           {ratingOptions.map(opt => (
             <label key={opt.value} className="flex items-center gap-3 cursor-pointer">
               <input
-                type="radio"
-                name="rating"
-                value={opt.value}
+                type="radio" name="rating" value={opt.value}
                 checked={activeRating === opt.value}
                 onChange={(e) => updateParam('rating', e.target.value)}
                 className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
@@ -250,6 +212,7 @@ export default function MarketplacePage() {
 
   return (
     <main className="min-h-screen pb-20">
+      {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="section-container py-8">
           <ScrollReveal>
@@ -274,9 +237,7 @@ export default function MarketplacePage() {
                     className="w-full h-[52px] pl-12 pr-4 border border-gray-200 rounded-l-full text-base focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
                   />
                 </div>
-                <button className="btn-primary rounded-l-none rounded-r-full h-[52px] px-7">
-                  Search
-                </button>
+                <button className="btn-primary rounded-l-none rounded-r-full h-[52px] px-7">Search</button>
               </div>
             </div>
           </ScrollReveal>
@@ -307,15 +268,17 @@ export default function MarketplacePage() {
         </div>
       </div>
 
-      {usingMock && !loading && (
+      {/* Error banner */}
+      {error && !loading && (
         <div className="section-container pt-4">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-sm text-amber-700 flex items-center justify-between">
-            <span>Showing demo services — real services will appear once published.</span>
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-sm text-red-700 flex items-center justify-between">
+            <span>Unable to reach the server. Please try again.</span>
             <button onClick={fetchServices} className="underline text-xs ml-4 shrink-0">Retry</button>
           </div>
         </div>
       )}
 
+      {/* Main content */}
       <div className="section-container py-8">
         <div className="flex gap-8">
           {isDesktop && (
@@ -331,7 +294,7 @@ export default function MarketplacePage() {
               <p className="text-sm text-gray-500">
                 {loading
                   ? 'Loading services...'
-                  : `Showing ${filteredServices.length} of ${allServices.length} services`}
+                  : `Showing ${filteredServices.length} of ${apiServices.length} services`}
               </p>
               <div className="flex items-center gap-2 relative">
                 {!isDesktop && (
@@ -352,9 +315,7 @@ export default function MarketplacePage() {
                 <AnimatePresence>
                   {sortOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
+                      initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                       className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-20 min-w-[180px]"
                     >
                       {sortOptions.map(opt => (
@@ -390,29 +351,34 @@ export default function MarketplacePage() {
             ) : (
               <div className="text-center py-20">
                 <Search size={48} className="text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700">No services found</h3>
-                <p className="text-gray-500 mt-2">Try adjusting your filters or search query</p>
-                <button onClick={clearFilters} className="btn-primary mt-4">Clear Filters</button>
+                <h3 className="text-lg font-semibold text-gray-700">
+                  {hasFilters ? 'No services match your filters' : 'No services yet'}
+                </h3>
+                <p className="text-gray-500 mt-2">
+                  {hasFilters
+                    ? 'Try adjusting your filters or search query'
+                    : 'Be the first to publish a service on WorkπServ!'}
+                </p>
+                {hasFilters && (
+                  <button onClick={clearFilters} className="btn-primary mt-4">Clear Filters</button>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
+      {/* Mobile filter drawer */}
       <AnimatePresence>
         {mobileFilterOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/40 z-50"
               onClick={() => setMobileFilterOpen(false)}
             />
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: '20%' }}
-              exit={{ y: '100%' }}
+              initial={{ y: '100%' }} animate={{ y: '20%' }} exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
               className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl p-6 overflow-y-auto"
               style={{ maxHeight: '80vh' }}
