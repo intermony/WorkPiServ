@@ -5,11 +5,9 @@ import { motion } from 'framer-motion';
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#FFF5F0] via-[#F8F0FF] to-[#F0F4FF] rounded-b-[32px]">
-      {/* Decorative elements */}
       <div className="absolute top-10 left-10 w-[300px] h-[300px] bg-brand/8 rounded-full blur-[80px]" />
       <div className="absolute bottom-10 right-10 w-[250px] h-[250px] bg-escrow/6 rounded-full blur-[80px]" />
-      
-      {/* Floating Pi Symbol */}
+
       <motion.div
         className="absolute right-[10%] top-[20%] hidden lg:block"
         animate={{ y: [-8, 8] }}
@@ -20,7 +18,6 @@ export function HeroSection() {
 
       <div className="section-container relative z-10 py-20 lg:py-32">
         <div className="max-w-xl">
-          {/* Testnet Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -32,7 +29,6 @@ export function HeroSection() {
             </span>
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             className="font-heading font-bold text-4xl lg:text-5xl text-navy leading-tight"
             initial={{ opacity: 0, y: 20 }}
@@ -43,7 +39,6 @@ export function HeroSection() {
             <span className="text-brand">with Pi π</span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             className="mt-5 text-lg text-gray-500 leading-relaxed max-w-md"
             initial={{ opacity: 0, y: 20 }}
@@ -53,7 +48,6 @@ export function HeroSection() {
             The first Arabic & global secure freelance platform powered by Pi. Connecting talent with opportunity through our smart Escrow system.
           </motion.p>
 
-          {/* CTA Buttons */}
           <motion.div
             className="flex flex-col sm:flex-row gap-3 mt-8"
             initial={{ opacity: 0, y: 20 }}
@@ -64,7 +58,7 @@ export function HeroSection() {
               Explore Services
               <ArrowRight size={18} />
             </Link>
-            <Link to="#" className="btn-secondary inline-flex items-center justify-center text-base py-3.5 px-7">
+            <Link to="/create-service" className="btn-secondary inline-flex items-center justify-center text-base py-3.5 px-7">
               Join as Freelancer
             </Link>
           </motion.div>
@@ -72,5 +66,4 @@ export function HeroSection() {
       </div>
     </section>
   );
-      }
-            
+}

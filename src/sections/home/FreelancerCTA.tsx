@@ -9,7 +9,6 @@ export function FreelancerCTA() {
       <div className="section-container">
         <ScrollReveal>
           <div className="relative overflow-hidden bg-gradient-to-br from-brand to-[#FF8A5C] rounded-3xl px-8 py-12 lg:px-16 lg:py-16 text-center">
-            {/* Decorative Pi */}
             <motion.span
               className="absolute -bottom-6 -right-6 text-[150px] font-heading font-bold text-white/10 select-none"
               animate={{ y: [-4, 4] }}
@@ -26,13 +25,12 @@ export function FreelancerCTA() {
             </p>
 
             <Link
-              to="#"
+              to="/create-service"
               className="mt-6 inline-flex items-center gap-2 border-2 border-white text-white font-medium px-7 py-3.5 rounded-full hover:bg-white hover:text-brand transition-all duration-200 relative z-10"
             >
               + New Service
             </Link>
 
-            {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center gap-6 mt-8 relative z-10">
               <div className="flex items-center gap-2 text-white/80">
                 <ShieldCheck size={16} />

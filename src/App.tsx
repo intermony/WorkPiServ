@@ -9,6 +9,7 @@ import ServiceDetailPage from '@/pages/ServiceDetailPage';
 import OrdersPage from '@/pages/OrdersPage';
 import ProfilePage from '@/pages/ProfilePage';
 import CreateServicePage from '@/pages/CreateServicePage';
+import MessagesPage from '@/pages/MessagesPage';
 import AboutPage from '@/pages/static/AboutPage';
 import HelpPage from '@/pages/static/HelpPage';
 import SafetyPage from '@/pages/static/SafetyPage';
@@ -16,6 +17,9 @@ import ContactPage from '@/pages/static/ContactPage';
 import ReportPage from '@/pages/static/ReportPage';
 import BlogPage from '@/pages/static/BlogPage';
 import AffiliatePage from '@/pages/static/AffiliatePage';
+import PrivacyPage from '@/pages/static/PrivacyPage';
+import TermsPage from '@/pages/static/TermsPage';
+import CookiesPage from '@/pages/static/CookiesPage';
 
 declare global {
   interface Window {
@@ -51,7 +55,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/create-service" element={<CreateServicePage />} />
-          {/* Static pages */}
+          <Route path="/messages" element={<MessagesPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/safety" element={<SafetyPage />} />
@@ -59,6 +63,9 @@ export default function App() {
           <Route path="/report" element={<ReportPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/affiliate" element={<AffiliatePage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
         </Routes>
       </AnimatePresence>
     </AppLayout>

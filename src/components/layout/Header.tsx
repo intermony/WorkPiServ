@@ -9,7 +9,7 @@ const navItems = [
   { label: 'Home', icon: Home, href: '/' },
   { label: 'Marketplace', icon: ShoppingCart, href: '/marketplace' },
   { label: 'My Orders', icon: Package, href: '/orders' },
-  { label: 'Messages', icon: MessageCircle, href: '#' },
+  { label: 'Messages', icon: MessageCircle, href: '/messages' },
 ];
 
 const PI_BROWSER_LINKS = {
@@ -41,36 +41,13 @@ export function Header() {
     login();
   };
 
-  const LoginButton = ({ className = '' }: { className?: string }) => {
-    if (loading) return (
-      <button disabled className={`btn-primary text-sm py-2 px-5 opacity-70 ${className}`}>
-        <span className="flex items-center gap-2">
-          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          Connecting...
-        </span>
-      </button>
-    );
-
-    if (loggedIn && user) return (
-      <button onClick={handleLoginClick} className={`btn-primary text-sm py-2 px-5 ${className}`}>
-        Login with π
-      </button>
-    );
-
-    return (
-      <button onClick={handleLoginClick} className={`btn-primary text-sm py-2 px-5 ${className}`}>
-        Login with π
-      </button>
-    );
-  };
-
   return (
     <>
       <header className={`sticky top-0 z-50 bg-white border-b border-gray-200 transition-shadow duration-200 ${scrolled ? 'shadow-nav' : ''}`}>
         <div className="section-container">
           <div className="flex items-center justify-between h-16">
             {isMobile ? (
-              <button onClick={() => setMobileDrawerOpen(true)} className="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Open menu">
+              <button onClick={() => setMobileDrawerOpen(true)} className="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors">
                 <Menu size={24} className="text-navy" />
               </button>
             ) : null}
@@ -112,12 +89,14 @@ export function Header() {
                     <div className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 rounded-full">
                       <span className="text-sm font-medium text-gray-700">@{user.username}</span>
                     </div>
-                    <button onClick={logout} className="p-2 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Logout">
+                    <button onClick={logout} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                       <LogOut size={18} className="text-gray-500" />
                     </button>
                   </div>
                 ) : (
-                  <LoginButton />
+                  <button onClick={handleLoginClick} className="btn-primary text-sm py-2 px-5">
+                    {loading ? 'Connecting...' : 'Login with π'}
+                  </button>
                 )}
               </div>
             </div>
@@ -140,7 +119,6 @@ export function Header() {
         </AnimatePresence>
       </header>
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileDrawerOpen && (
           <>
@@ -154,7 +132,6 @@ export function Header() {
                   </Link>
                   <button onClick={() => setMobileDrawerOpen(false)} className="p-2 rounded-lg hover:bg-gray-100"><X size={20} /></button>
                 </div>
-
                 <nav className="space-y-1">
                   {navItems.map((item) => {
                     const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
@@ -165,11 +142,9 @@ export function Header() {
                     );
                   })}
                 </nav>
-
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   {loggedIn && user ? (
                     <div className="space-y-3">
-                      {/* User info */}
                       <div className="flex items-center gap-3 px-2">
                         <div className="w-10 h-10 bg-brand rounded-full flex items-center justify-center">
                           <span className="text-white font-bold">{user.username.charAt(0).toUpperCase()}</span>
@@ -179,19 +154,16 @@ export function Header() {
                           <p className="text-sm text-gray-500">{user.type === 'both' ? 'Client & Freelancer' : user.type}</p>
                         </div>
                       </div>
-                      {/* Balance */}
                       <div className="flex items-center justify-between px-2 py-2 bg-brand-light rounded-xl">
                         <span className="text-sm text-gray-600">Balance</span>
                         <span className="font-bold text-brand">π {user.balance?.toFixed(2) || '0.00'}</span>
                       </div>
-                      {/* Counters */}
                       {(user.newOrders > 0 || user.unreadMessages > 0) && (
                         <div className="flex gap-2">
                           {user.newOrders > 0 && <span className="flex-1 text-center py-1 bg-orange-50 text-orange-600 text-xs font-medium rounded-lg">{user.newOrders} new orders</span>}
                           {user.unreadMessages > 0 && <span className="flex-1 text-center py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-lg">{user.unreadMessages} messages</span>}
                         </div>
                       )}
-                      {/* Logout */}
                       <button onClick={() => { logout(); setMobileDrawerOpen(false); }} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
                         <LogOut size={16} /><span>Logout</span>
                       </button>
@@ -208,7 +180,6 @@ export function Header() {
         )}
       </AnimatePresence>
 
-      {/* Pi Browser Modal */}
       <AnimatePresence>
         {showPiModal && (
           <>
@@ -221,8 +192,7 @@ export function Header() {
                 <h3 className="font-heading font-bold text-xl text-navy mb-2">Open in Pi Browser</h3>
                 <div className="space-y-2 mb-6">
                   <p className="text-gray-600 text-sm">Open WorkPiServ in the Pi Browser to login and make real transactions.</p>
-                  <p className="text-gray-500 text-sm">Ouvrez WorkPiServ dans Pi Browser pour vous connecter et effectuer de vraies transactions.</p>
-                  <p className="text-gray-500 text-sm" dir="rtl">افتح WorkPiServ في Pi Browser لتسجيل الدخول والمعاملات الحقيقية.</p>
+                  <p className="text-gray-500 text-sm">Ouvrez WorkPiServ dans Pi Browser pour vous connecter.</p>
                 </div>
                 <div className="space-y-3">
                   <a href={PI_BROWSER_LINKS.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-navy text-white py-3 px-4 rounded-full font-medium hover:bg-navy/90 transition-colors">
@@ -240,4 +210,4 @@ export function Header() {
       </AnimatePresence>
     </>
   );
-        }
+}
