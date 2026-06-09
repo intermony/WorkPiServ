@@ -1,5 +1,18 @@
-import { useState, useEffect } from 'react';
-import { MessageSquare, Send, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageSquare, Send, User, ArrowLeft, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
+
+interface Conversation {
+  _id: string;
+  participantId: string;
+  participantName: string;
+  participantAvatar?: string;
+  lastMessage: string;
+  lastMessageAt: string;
+  unread: number;
+}
 
 interface Message {
   _id: string;
@@ -9,93 +22,231 @@ interface Message {
   created_at: string;
 }
 
+function getToken(): string | null {
+  try { return localStorage.getItem('workpiserv_token'); } catch { return null; }
+}
+
+function getMyId(): string | null {
+  try {
+    const u = localStorage.getItem('workpiserv_user');
+    return u ? JSON.parse(u)._id || null : null;
+  } catch { return null; }
+}
+
 export default function MessagesPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newMessage, setNewMessage] = useState('');
+  const navigate = useNavigate();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messages, setMessages]           = useState<Message[]>([]);
+  const [activeConv, setActiveConv]       = useState<Conversation | null>(null);
+  const [newMessage, setNewMessage]       = useState('');
+  const [loadingConvs, setLoadingConvs]   = useState(true);
+  const [loadingMsgs, setLoadingMsgs]     = useState(false);
+  const [sending, setSending]             = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const myId = getMyId();
 
-  // On simule une récupération de l'historique de chat pour le test
-  // Plus tard, on liera dynamiquement l'ID du correspondant
   useEffect(() => {
-    const fetchChat = async () => {
-      try {
-        const token = localStorage.getItem('workpiserv_token');
-        // Appel temporaire sur une discussion générique ou vide au début
-        const res = await fetch('https://workpiserv-api.onrender.com/api/messages/chat/all', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setMessages(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error("Erreur de chargement des messages:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChat();
+    const token = getToken();
+    if (!token) { setLoadingConvs(false); return; }
+    fetch(`${API_URL}/api/messages/conversations`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setConversations(Array.isArray(data) ? data : []))
+      .catch(() => setConversations([]))
+      .finally(() => setLoadingConvs(false));
   }, []);
+
+  useEffect(() => {
+    if (!activeConv) return;
+    setLoadingMsgs(true);
+    const token = getToken();
+    fetch(`${API_URL}/api/messages/chat/${activeConv.participantId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setMessages(Array.isArray(data) ? data : []))
+      .catch(() => setMessages([]))
+      .finally(() => setLoadingMsgs(false));
+  }, [activeConv]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-    
-    // Logique d'envoi à connecter avec ton API
+    if (!newMessage.trim() || !activeConv || sending) return;
+    const token = getToken();
+    if (!token) return;
+    const text = newMessage.trim();
     setNewMessage('');
+    setSending(true);
+    const tempMsg: Message = {
+      _id: `temp-${Date.now()}`,
+      sender_id: myId || '',
+      recver_id: activeConv.participantId,
+      text,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, tempMsg]);
+    try {
+      const res = await fetch(`${API_URL}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ recver_id: activeConv.participantId, text }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setMessages(prev => prev.map(m => m._id === tempMsg._id ? saved : m));
+        setConversations(prev => prev.map(c =>
+          c._id === activeConv._id
+            ? { ...c, lastMessage: text, lastMessageAt: new Date().toISOString() }
+            : c
+        ));
+      }
+    } catch {
+      // keep optimistic message
+    } finally {
+      setSending(false);
+    }
   };
 
+  const formatTime = (iso: string) => {
+    try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
+  };
+
+  const formatDate = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      const today = new Date();
+      if (d.toDateString() === today.toDateString()) return 'Today';
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    } catch { return ''; }
+  };
+
+  const showChat = !!activeConv;
+
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] bg-gray-50 max-w-md mx-auto border-x border-gray-100">
-      {/* Header du Chat */}
-      <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-3 sticky top-0 z-10">
-        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
-          <User size={20} />
+    <div className="flex h-[calc(100vh-8rem)] bg-gray-50 max-w-4xl mx-auto border-x border-gray-100 overflow-hidden">
+      <div className={`flex flex-col w-full md:w-80 shrink-0 bg-white border-r border-gray-200 ${showChat ? 'hidden md:flex' : 'flex'}`}>
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="font-semibold text-gray-800 text-lg">Messages</h2>
         </div>
-        <div>
-          <h2 className="font-semibold text-gray-800">Messagerie WorkPi</h2>
-          <p className="text-xs text-green-500 font-medium">Connecté à MongoDB Atlas</p>
+        <div className="flex-1 overflow-y-auto">
+          {loadingConvs ? (
+            <div className="flex items-center justify-center h-32 gap-2 text-gray-400">
+              <Loader2 size={18} className="animate-spin" />
+              <span className="text-sm">Loading...</span>
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400 gap-2 px-6 text-center">
+              <MessageSquare size={40} className="text-gray-300" />
+              <p className="font-medium text-gray-600">No conversations yet</p>
+              <p className="text-xs">Messages from your orders will appear here.</p>
+            </div>
+          ) : (
+            conversations.map(conv => (
+              <button
+                key={conv._id}
+                onClick={() => setActiveConv(conv)}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 ${activeConv?._id === conv._id ? 'bg-orange-50' : ''}`}
+              >
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0 text-sm font-bold">
+                  {conv.participantAvatar
+                    ? <img src={conv.participantAvatar} className="w-10 h-10 rounded-full object-cover" alt="" />
+                    : conv.participantName.charAt(0).toUpperCase()
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-gray-800 text-sm truncate">{conv.participantName}</span>
+                    <span className="text-xs text-gray-400 shrink-0 ml-1">{formatDate(conv.lastMessageAt)}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 truncate mt-0.5">{conv.lastMessage}</p>
+                </div>
+                {conv.unread > 0 && (
+                  <span className="w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center shrink-0">
+                    {conv.unread}
+                  </span>
+                )}
+              </button>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Zone des messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {loading ? (
+      <div className={`flex flex-col flex-1 ${showChat ? 'flex' : 'hidden md:flex'}`}>
+        {!activeConv ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
-            <div className="w-6 h-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm">Chargement des discussions...</span>
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2 px-6 text-center">
-            <MessageSquare size={40} className="text-gray-300 animate-bounce" />
-            <p className="font-medium text-gray-600">Aucune discussion active</p>
-            <p className="text-xs">Les messages liés à vos contrats et commandes MongoDB s'afficheront ici.</p>
+            <MessageSquare size={48} className="text-gray-300" />
+            <p className="text-sm">Select a conversation</p>
           </div>
         ) : (
-          messages.map((msg) => (
-            <div key={msg._id} className="flex flex-col">
-              <div className="bg-white p-3 rounded-lg shadow-sm max-w-[80%] border border-gray-100">
-                <p className="text-sm text-gray-800">{msg.text}</p>
+          <>
+            <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-3 sticky top-0 z-10">
+              <button onClick={() => { setActiveConv(null); navigate('/messages'); }} className="md:hidden p-1 text-gray-500">
+                <ArrowLeft size={20} />
+              </button>
+              <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold shrink-0">
+                {activeConv.participantAvatar
+                  ? <img src={activeConv.participantAvatar} className="w-9 h-9 rounded-full object-cover" alt="" />
+                  : <User size={18} />
+                }
               </div>
+              <h2 className="font-semibold text-gray-800 text-sm">{activeConv.participantName}</h2>
             </div>
-          ))
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {loadingMsgs ? (
+                <div className="flex items-center justify-center h-full gap-2 text-gray-400">
+                  <Loader2 size={18} className="animate-spin" />
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
+                  <p className="text-sm">Start the conversation!</p>
+                </div>
+              ) : (
+                messages.map(msg => {
+                  const isMine = msg.sender_id === myId;
+                  return (
+                    <div key={msg._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
+                        isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm'
+                      }`}>
+                        <p>{msg.text}</p>
+                        <p className={`text-[10px] mt-1 ${isMine ? 'text-orange-200' : 'text-gray-400'}`}>
+                          {formatTime(msg.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={bottomRef} />
+            </div>
+
+            <form onSubmit={handleSend} className="p-4 bg-white border-t border-gray-200 flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={e => setNewMessage(e.target.value)}
+                placeholder="Write a message..."
+                className="flex-1 px-4 py-2 bg-gray-100 border border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-orange-500 transition-all"
+                disabled={sending}
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim() || sending}
+                className="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+              </button>
+            </form>
+          </>
         )}
       </div>
-
-      {/* Formulaire d'envoi */}
-      <form onSubmit={handleSend} className="p-4 bg-white border-t border-gray-200 flex gap-2 pb-safe">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Écrire un message..."
-          className="flex-1 px-4 py-2 bg-gray-100 border border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-orange-500 transition-all"
-        />
-        <button type="submit" className="p-2 bg-orange-600 text-white rounded-full hover:bg-orange-700 transition-colors">
-          <Send size={18} />
-        </button>
-      </form>
     </div>
   );
-      }
+}
