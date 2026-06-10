@@ -18,6 +18,12 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; bg: stri
   cancelled:       { label: 'Cancelled',       color: 'text-red-600',    bg: 'bg-red-50' },
 };
 
+// Tolère les anciens statuts inconnus (ex. "pending" des premières versions)
+function getStatusConfig(status: string) {
+  return statusConfig[status as OrderStatus]
+    ?? { label: status, color: 'text-gray-600', bg: 'bg-gray-100' };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeOrder(o: any): OrderEx {
   return {
@@ -184,7 +190,7 @@ export default function OrdersPage() {
             {/* List */}
             <div className="lg:w-[360px] shrink-0 space-y-3">
               {filtered.map(order => {
-                const sc = statusConfig[order.status];
+                const sc = getStatusConfig(order.status);
                 return (
                   <div
                     key={order.id}
@@ -245,8 +251,8 @@ export default function OrdersPage() {
                       <p className="font-semibold text-purple-700 text-sm">Payment Protected in Escrow</p>
                       <p className="text-xs text-gray-500">π {activeOrder.price} held safely until delivery confirmed</p>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusConfig[activeOrder.status].bg} ${statusConfig[activeOrder.status].color}`}>
-                      {statusConfig[activeOrder.status].label}
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusConfig(activeOrder.status).bg} ${getStatusConfig(activeOrder.status).color}`}>
+                      {getStatusConfig(activeOrder.status).label}
                     </span>
                   </div>
 
