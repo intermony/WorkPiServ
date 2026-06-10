@@ -3,10 +3,6 @@
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
-// Pi Browser detection:
-// Pi Browser injects window.Pi AND runs as Android WebView (wv)
-// Regular Chrome on Android also has wv but does NOT have window.Pi
-// So window.Pi is the correct and only reliable detection method
 export function isPiBrowser(): boolean {
   return typeof window !== 'undefined' && !!window.Pi;
 }
@@ -48,7 +44,7 @@ class PiSDK {
     }
   }
 
-  async authenticate(): Promise<{ token: string; user: { uid: string; username: string }; isNew?: boolean; piUserId?: string; username?: string } | null> {
+  async authenticate(): Promise<{ token: string; user: { uid: string; username: string } } | null> {
     if (!this.initialized) await this.init();
     if (!window.Pi) return null;
 
@@ -57,30 +53,18 @@ class PiSDK {
       this.onIncompletePaymentFound.bind(this)
     ) as PiAuthResult;
 
-    const res = await fetch(`${API_URL}/api/auth/pi`, {
+    const res = await fetch(`${API_URL}/api/auth/pi-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: auth.user, accessToken: auth.accessToken })
+      body: JSON.stringify({
+        pi_uid       : auth.user.uid,
+        pi_username  : auth.user.username,
+        access_token : auth.accessToken || auth.user.uid,
+      })
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Authentication failed');
-
-    if (data.isNew) {
-      const regRes = await fetch(`${API_URL}/api/auth/pi/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ piUserId: data.piUserId, username: data.username })
-      });
-      const regData = await regRes.json();
-      if (regData.token) {
-        localStorage.setItem('workpiserv_token', regData.token);
-        localStorage.setItem('workpiserv_user', JSON.stringify(regData.user));
-        this.user = regData.user;
-        return regData;
-      }
-      return null;
-    }
 
     if (data.token) {
       localStorage.setItem('workpiserv_token', data.token);
@@ -95,18 +79,30 @@ class PiSDK {
     if (!this.initialized || !window.Pi) throw new Error('Pi SDK not initialized');
     const token = localStorage.getItem('workpiserv_token');
     return await (window.Pi as unknown as { createPayment: (data: unknown, cb: unknown) => Promise<unknown> }).createPayment(
-      { amount: orderData.amount, memo: orderData.memo || 'WorkPiServ Order', metadata: { serviceId: orderData.serviceId } },
+      {
+        amount   : orderData.amount,
+        memo     : orderData.memo || 'WorkPiServ Order',
+        metadata : { serviceId: orderData.serviceId }
+      },
       {
         onReadyForServerApproval: async (paymentId: string) => {
-          const res = await fetch(`${API_URL}/api/payments/approve`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ paymentId, serviceId: orderData.serviceId, requirements: orderData.requirements || '' }) });
+          const res = await fetch(`${API_URL}/api/payments/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ paymentId, serviceId: orderData.serviceId, requirements: orderData.requirements || '' })
+          });
           callbacks.onReadyForServerApproval?.(paymentId, await res.json());
         },
         onReadyForServerCompletion: async (paymentId: string, txid: string) => {
-          const res = await fetch(`${API_URL}/api/payments/complete`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ paymentId, txid }) });
+          const res = await fetch(`${API_URL}/api/payments/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ paymentId, txid })
+          });
           callbacks.onReadyForServerCompletion?.(paymentId, txid, await res.json());
         },
-        onCancel: () => callbacks.onCancel?.(),
-        onError: (error: unknown) => callbacks.onError?.(error)
+        onCancel : () => callbacks.onCancel?.(),
+        onError  : (error: unknown) => callbacks.onError?.(error)
       }
     );
   }
@@ -114,7 +110,11 @@ class PiSDK {
   async onIncompletePaymentFound(payment: unknown) {
     try {
       const token = localStorage.getItem('workpiserv_token');
-      await fetch(`${API_URL}/api/payments/incomplete`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ paymentId: (payment as { identifier: string }).identifier }) });
+      await fetch(`${API_URL}/api/payments/incomplete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ paymentId: (payment as { identifier: string }).identifier })
+      });
     } catch (err) { console.error('Incomplete payment error:', err); }
   }
 
