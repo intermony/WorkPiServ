@@ -3,6 +3,8 @@ import { AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { WelcomeModal } from '@/components/shared/WelcomeModal';
+import { usePiAuth } from '@/hooks/usePiAuth';
 import HomePage from '@/pages/HomePage';
 import MarketplacePage from '@/pages/MarketplacePage';
 import ServiceDetailPage from '@/pages/ServiceDetailPage';
@@ -43,9 +45,18 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const location = useLocation();
+  const { user, isNewUser, clearNewUser } = usePiAuth();
 
   return (
     <AppLayout>
+      {/* Welcome Modal — nouveaux Pioneers uniquement */}
+      {isNewUser && user && (
+        <WelcomeModal
+          username={user.username}
+          onClose={clearNewUser}
+        />
+      )}
+
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.hash || '/'}>
           <Route path="/" element={<HomePage />} />
@@ -70,4 +81,4 @@ export default function App() {
       </AnimatePresence>
     </AppLayout>
   );
-}
+          }
