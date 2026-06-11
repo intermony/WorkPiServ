@@ -1,4 +1,5 @@
 import { Shield, Globe, Zap } from 'lucide-react';
+import { useLanguage } from '@/i18n';
 
 // Use navigate function instead of Link for Pi Browser compatibility
 const navigate = (href: string) => {
@@ -6,27 +7,28 @@ const navigate = (href: string) => {
 };
 
 const platformLinks = [
-  { label: 'Browse Services', href: '/marketplace' },
-  { label: 'How It Works', href: '/' },
-  { label: 'Escrow System', href: '/safety' },
-  { label: 'Pricing', href: '/help' },
+  { label: 'market.title', href: '/marketplace' },
+  { label: 'home.howTitle', href: '/' },
+  { label: 'footer.escrowSystem', href: '/safety' },
+  { label: 'footer.pricing', href: '/help' },
 ];
 
 const supportLinks = [
-  { label: 'Help Center', href: '/help' },
-  { label: 'Safety & Trust', href: '/safety' },
-  { label: 'Report an Issue', href: '/report' },
-  { label: 'Contact Us', href: '/contact' },
+  { label: 'footer.helpCenter', href: '/help' },
+  { label: 'footer.safetyTrust', href: '/safety' },
+  { label: 'footer.reportIssue', href: '/report' },
+  { label: 'footer.contactUs', href: '/contact' },
 ];
 
 const communityLinks = [
-  { label: 'About Us', href: '/about' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Become a Freelancer', href: '/marketplace' },
-  { label: 'Affiliate Program', href: '/affiliate' },
+  { label: 'footer.aboutUs', href: '/about' },
+  { label: 'footer.blog', href: '/blog' },
+  { label: 'footer.becomeFreelancer', href: '/marketplace' },
+  { label: 'footer.affiliate', href: '/affiliate' },
 ];
 
 export function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="bg-navy text-white">
       <div className="section-container py-16 pb-8">
@@ -42,7 +44,7 @@ export function Footer() {
               </span>
             </button>
             <p className="text-sm text-gray-400 leading-relaxed">
-              The first Arabic & global secure freelance platform powered by Pi Network. Connecting talent with opportunity through our smart Escrow system.
+              {t('footer.tagline')}
             </p>
             <div className="flex items-center gap-4 mt-4">
               <Shield size={16} className="text-gray-400" />
@@ -53,12 +55,12 @@ export function Footer() {
 
           {/* Platform */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">Platform</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">{t('footer.platform')}</h4>
             <ul className="space-y-3">
               {platformLinks.map((link) => (
                 <li key={link.label}>
                   <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
-                    {link.label}
+                    {t(link.label)}
                   </button>
                 </li>
               ))}
@@ -67,12 +69,12 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">Support</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">{t('footer.support')}</h4>
             <ul className="space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.label}>
                   <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
-                    {link.label}
+                    {t(link.label)}
                   </button>
                 </li>
               ))}
@@ -81,12 +83,12 @@ export function Footer() {
 
           {/* Community */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">Community</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-4">{t('footer.community')}</h4>
             <ul className="space-y-3">
               {communityLinks.map((link) => (
                 <li key={link.label}>
                   <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
-                    {link.label}
+                    {t(link.label)}
                   </button>
                 </li>
               ))}
@@ -97,16 +99,15 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">
-            &copy; 2026 WorkπServ. All rights reserved.
+            &copy; 2026 WorkπServ. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/privacy')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Privacy Policy</button>
-            <button onClick={() => navigate('/terms')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Terms of Service</button>
-            <button onClick={() => navigate('/cookies')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">Cookies</button>
+            <button onClick={() => navigate('/privacy')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.privacy')}</button>
+            <button onClick={() => navigate('/terms')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.terms')}</button>
+            <button onClick={() => navigate('/cookies')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.cookies')}</button>
           </div>
         </div>
       </div>
     </footer>
   );
-          }
-          
+}
