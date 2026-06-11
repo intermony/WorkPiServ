@@ -9,6 +9,7 @@ import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { StarRating } from '@/components/shared/StarRating';
 import { usePiAuth } from '@/hooks/usePiAuth';
 import { piSDK, isPiBrowser } from '@/lib/pi';
+import { useLanguage } from '@/i18n';
 import type { Service, Review } from '@/types';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
@@ -65,6 +66,7 @@ export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, loggedIn, login } = usePiAuth();
+  const { t } = useLanguage();
   const [service, setService]         = useState<Service | null>(null);
   const [reviews, setReviews]         = useState<Review[]>([]);
   const [loading, setLoading]         = useState(true);
@@ -99,7 +101,7 @@ export default function ServiceDetailPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Loading service...</p>
+          <p className="text-gray-500 text-sm">{t('service.loading')}</p>
         </div>
       </main>
     );
@@ -109,7 +111,7 @@ export default function ServiceDetailPage() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-navy">Service not found</h1>
+          <h1 className="text-2xl font-bold text-navy">{t('service.notFound')}</h1>
           <Link to="/marketplace" className="text-brand hover:underline mt-4 inline-block">
             Browse services
           </Link>
@@ -131,11 +133,11 @@ export default function ServiceDetailPage() {
     setBuyError(null);
 
     if (!isPiBrowser()) {
-      setBuyError('Open WorkπServ in the Pi Browser to pay with Pi.');
+      setBuyError(t('service.openPi'));
       return;
     }
     if (!loggedIn) {
-      try { await login(); } catch { setBuyError('Please sign in with Pi first.'); return; }
+      try { await login(); } catch { setBuyError(t('service.signInFirst')); return; }
     }
 
     const amount = pkg?.price || service.price;
@@ -156,13 +158,13 @@ export default function ServiceDetailPage() {
           onCancel : () => setBuying(false),
           onError  : () => {
             setBuying(false);
-            setBuyError('Payment failed. Please try again.');
+            setBuyError(t('service.payFailed'));
           },
         }
       );
     } catch {
       setBuying(false);
-      setBuyError('Could not start the payment. Please try again.');
+      setBuyError(t('service.payStart'));
     }
   };
 
@@ -171,9 +173,9 @@ export default function ServiceDetailPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="section-container py-4">
           <div className="text-sm text-gray-500 truncate">
-            <Link to="/" className="text-brand hover:underline">Home</Link>
+            <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
             <span className="mx-2">/</span>
-            <Link to="/marketplace" className="text-brand hover:underline">Marketplace</Link>
+            <Link to="/marketplace" className="text-brand hover:underline">{t('nav.marketplace')}</Link>
             <span className="mx-2">/</span>
             <span className="capitalize text-gray-700">{service.category}</span>
             <span className="mx-2">/</span>
@@ -209,7 +211,7 @@ export default function ServiceDetailPage() {
               <div className="flex flex-wrap items-center gap-3 mt-3">
                 <span className="bg-brand-light text-brand text-xs font-medium px-3 py-1 rounded-full capitalize">{service.category}</span>
                 <span className="bg-escrow-light text-escrow text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"><ShieldCheck size={12} /> Escrow Protected</span>
-                <span className="flex items-center gap-1 text-sm text-gray-500"><Clock size={14} /> {service.deliveryDays} days delivery</span>
+                <span className="flex items-center gap-1 text-sm text-gray-500"><Clock size={14} /> {service.deliveryDays} {t('service.daysDelivery')}</span>
               </div>
             </ScrollReveal>
 
@@ -237,11 +239,11 @@ export default function ServiceDetailPage() {
 
             <ScrollReveal className="mt-8">
               <div className="card-surface p-6 lg:p-8">
-                <h2 className="font-heading font-bold text-xl text-navy mb-4">About This Service</h2>
+                <h2 className="font-heading font-bold text-xl text-navy mb-4">{t('service.about')}</h2>
                 <p className="text-gray-600 leading-relaxed">{service.description}</p>
                 {service.faqs && service.faqs.length > 0 && (
                   <div className="mt-8 pt-6 border-t border-gray-200">
-                    <h3 className="font-heading font-bold text-lg text-navy mb-4">Frequently Asked Questions</h3>
+                    <h3 className="font-heading font-bold text-lg text-navy mb-4">{t('service.faq')}</h3>
                     {service.faqs.map((faq) => {
                       const isOpen = openFaqs.includes(faq.question);
                       return (
@@ -269,9 +271,9 @@ export default function ServiceDetailPage() {
 
             <ScrollReveal className="mt-8">
               <div className="card-surface p-6 lg:p-8">
-                <h2 className="font-heading font-bold text-xl text-navy mb-6">Customer Reviews</h2>
+                <h2 className="font-heading font-bold text-xl text-navy mb-6">{t('service.reviews')}</h2>
                 {totalReviews === 0 ? (
-                  <p className="text-center text-gray-400 py-8">No reviews yet for this service.</p>
+                  <p className="text-center text-gray-400 py-8">{t('service.noReviews')}</p>
                 ) : (
                   <>
                     <div className="flex flex-col sm:flex-row gap-8 mb-8">
@@ -334,7 +336,7 @@ export default function ServiceDetailPage() {
                           <button key={p.name} onClick={() => setActivePackage(i)}
                             className={`flex-1 py-2.5 px-3 rounded-md text-sm font-medium transition-all relative ${activePackage === i ? 'bg-brand text-white shadow-sm' : 'text-gray-600 hover:text-navy'}`}>
                             {p.name}
-                            {p.popular && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full whitespace-nowrap">Popular</span>}
+                            {p.popular && <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-brand text-white text-[9px] px-1.5 py-0.5 rounded-full whitespace-nowrap">{t('service.popular')}</span>}
                           </button>
                         ))}
                       </div>
@@ -344,7 +346,7 @@ export default function ServiceDetailPage() {
                             <div className="text-3xl font-bold text-brand">π {pkg.price}</div>
                             <p className="text-sm text-gray-500 mt-1">{pkg.description}</p>
                             <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                              <span className="flex items-center gap-1"><Clock size={14} /> {pkg.deliveryDays} days</span>
+                              <span className="flex items-center gap-1"><Clock size={14} /> {pkg.deliveryDays} {t('service.days')}</span>
                               <span>{pkg.revisions} revisions</span>
                             </div>
                             <ul className="mt-5 space-y-2.5">
@@ -369,16 +371,16 @@ export default function ServiceDetailPage() {
                   >
                     {buying
                       ? <Loader2 size={20} className="animate-spin mx-auto" />
-                      : `Continue (π ${pkg?.price || service.price})`}
+                      : `${t('service.continue')} (π ${pkg?.price || service.price})`}
                   </button>
                   {isOwnService && (
-                    <p className="text-xs text-gray-400 text-center mt-2">This is your own service.</p>
+                    <p className="text-xs text-gray-400 text-center mt-2">{t('service.own')}</p>
                   )}
                   {buyError && (
                     <p className="text-xs text-red-600 text-center mt-2">{buyError}</p>
                   )}
                   <div className="flex gap-3 mt-3">
-                    <button className="btn-secondary flex-1 py-2.5 text-sm flex items-center justify-center gap-2"><MessageCircle size={16} /> Contact</button>
+                    <button className="btn-secondary flex-1 py-2.5 text-sm flex items-center justify-center gap-2"><MessageCircle size={16} /> {t('service.contact')}</button>
                     <button onClick={() => setSaved(!saved)} className={`btn-ghost py-2.5 px-4 ${saved ? 'text-red-500' : ''}`}>
                       <Heart size={18} className={saved ? 'fill-red-500' : ''} />
                     </button>
