@@ -23,8 +23,6 @@ interface UsePiAuthReturn {
   loggedIn: boolean;
   inPiBrowser: boolean;
   isNewUser: boolean;
-  showChromeModal: boolean;
-  setShowChromeModal: (show: boolean) => void;
   login: () => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -50,12 +48,10 @@ export function usePiAuth(): UsePiAuthReturn {
       return saved ? JSON.parse(saved) : null;
     } catch { return null; }
   });
-  
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [isNewUser, setIsNewUser] = useState(false);
-  const [showChromeModal, setShowChromeModal] = useState(false);
-  
+
   const inPiBrowser = isPiBrowser();
 
   const refreshUser = useCallback(async () => {
@@ -67,41 +63,46 @@ export function usePiAuth(): UsePiAuthReturn {
   }, []);
 
   const login = useCallback(async () => {
-    if (!inPiBrowser) {
-      setShowChromeModal(true);
-      return;
-    }
-
+    if (!inPiBrowser) return;
     if (loading) return;
     setLoading(true);
     setError(null);
-    
+
+    // Sécurité : ne jamais laisser le bouton figé si authenticate ne répond pas
+    const safety = setTimeout(() => setLoading(false), 12000);
+
     try {
       const result = await piSDK.authenticate();
       if (result?.user) {
+        // Détecter nouveau Pioneer
         const firstLoginKey = `wps_first_${result.user.uid}`;
         const alreadySeen = localStorage.getItem(firstLoginKey);
         if (!alreadySeen) {
           setIsNewUser(true);
           localStorage.setItem(firstLoginKey, '1');
         }
+        // Rafraîchir le profil complet
         const fresh = await fetchMe();
-        const userData = fresh || (result.user as unknown as PiUser);
+        const userData = fresh || result.user as unknown as PiUser;
         setUser(userData);
         localStorage.setItem('workpiserv_user', JSON.stringify(userData));
       }
     } catch (err) {
+      // Auto-login silencieux — pas d'erreur affichée
       console.error('Auth error:', err);
     } finally {
+      clearTimeout(safety);
       setLoading(false);
     }
   }, [inPiBrowser, loading]);
 
+  // ✅ AUTO-LOGIN au chargement si Pi Browser
   useEffect(() => {
     const token = localStorage.getItem('workpiserv_token');
     if (inPiBrowser && !token && !loading) {
       login();
     } else if (token && !user) {
+      // Token existant — rafraîchir le profil
       refreshUser();
     }
   }, []);
@@ -124,11 +125,9 @@ export function usePiAuth(): UsePiAuthReturn {
     loggedIn: !!localStorage.getItem('workpiserv_token') || user !== null,
     inPiBrowser,
     isNewUser,
-    showChromeModal,
-    setShowChromeModal,
     login,
     logout,
     refreshUser,
     clearNewUser,
   };
-}
+  }
