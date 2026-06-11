@@ -6,6 +6,7 @@ import {
   MapPin, Star,
 } from 'lucide-react';
 import { usePiAuth } from '@/hooks/usePiAuth';
+import { useLanguage } from '@/i18n';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
@@ -38,6 +39,7 @@ function Avatar({ avatar, size = 72 }: { avatar?: string; size?: number }) {
 export default function ProfilePage() {
   const { username: paramUsername } = useParams<{ username?: string }>();
   const { user, loading, loggedIn, login, logout, inPiBrowser, refreshUser } = usePiAuth();
+  const { t } = useLanguage();
 
   // ─── Champs étendus renvoyés par /api/auth/me ──────────────
   const u = user as (typeof user & {
@@ -87,7 +89,7 @@ export default function ProfilePage() {
       await refreshUser();
       setEditingProfile(false);
     } catch {
-      setProfileError("Échec de l'enregistrement. Réessayez.");
+      setProfileError(t('profile.saveFailed'));
     } finally {
       setSavingProfile(false);
     }
@@ -108,7 +110,7 @@ export default function ProfilePage() {
   const saveWallet = async () => {
     const value = draft.trim().toUpperCase();
     if (!PI_ADDRESS_REGEX.test(value)) {
-      setWalletError('Adresse invalide — elle doit commencer par G et faire 56 caractères.');
+      setWalletError(t('profile.walletInvalid'));
       return;
     }
     setSaving(true);
@@ -127,7 +129,7 @@ export default function ProfilePage() {
       await refreshUser();
       setEditing(false);
     } catch {
-      setWalletError("Échec de l'enregistrement. Réessayez.");
+      setWalletError(t('profile.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -149,7 +151,7 @@ export default function ProfilePage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Loading profile...</p>
+          <p className="text-gray-500 text-sm">{t('profile.loading')}</p>
         </div>
       </main>
     );
@@ -162,21 +164,21 @@ export default function ProfilePage() {
         <div className="bg-white border-b border-gray-200">
           <div className="section-container py-8">
             <div className="text-sm text-gray-500 mb-2">
-              <Link to="/" className="text-brand hover:underline">Home</Link>
+              <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
               <span className="mx-2">/</span>
-              <span className="text-gray-700">Profile</span>
+              <span className="text-gray-700">{t('nav.profile')}</span>
             </div>
             <div className="flex items-center gap-4">
               <Avatar avatar="👤" />
               <div>
                 <h1 className="font-heading font-bold text-2xl text-navy">@{paramUsername}</h1>
-                <p className="text-sm text-gray-500">Pioneer on WorkπServ</p>
+                <p className="text-sm text-gray-500">{t('profile.pioneer')}</p>
               </div>
             </div>
           </div>
         </div>
         <div className="section-container py-8">
-          <Link to="/marketplace" className="btn-primary inline-block">Browse services</Link>
+          <Link to="/marketplace" className="btn-primary inline-block">{t('orders.browse')}</Link>
         </div>
       </main>
     );
@@ -188,14 +190,14 @@ export default function ProfilePage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center px-6">
           <UserIcon size={48} className="text-gray-300 mx-auto mb-4" />
-          <h2 className="font-semibold text-gray-700 mb-2">You're not signed in</h2>
+          <h2 className="font-semibold text-gray-700 mb-2">{t('profile.notSignedIn')}</h2>
           <p className="text-sm text-gray-500 mb-4">
             {inPiBrowser
-              ? 'Sign in with Pi to view your profile.'
-              : 'Open WorkπServ in the Pi Browser to sign in.'}
+              ? t('profile.signInHint')
+              : t('profile.openPiBrowser')}
           </p>
           {inPiBrowser && (
-            <button onClick={login} className="btn-primary">Sign in with Pi</button>
+            <button onClick={login} className="btn-primary">{t('profile.signIn')}</button>
           )}
         </div>
       </main>
@@ -208,9 +210,9 @@ export default function ProfilePage() {
       <div className="bg-white border-b border-gray-200">
         <div className="section-container py-8">
           <div className="text-sm text-gray-500 mb-4">
-            <Link to="/" className="text-brand hover:underline">Home</Link>
+            <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-700">My Profile</span>
+            <span className="text-gray-700">{t('profile.title')}</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -250,14 +252,14 @@ export default function ProfilePage() {
         <section className="card-surface p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading font-semibold text-navy flex items-center gap-2">
-              <UserIcon size={18} className="text-brand" /> About
+              <UserIcon size={18} className="text-brand" /> {t('profile.about')}
             </h2>
             {!editingProfile && (
               <button
                 onClick={openProfileEditor}
                 className="text-sm text-brand font-medium flex items-center gap-1 hover:underline"
               >
-                <Pencil size={14} /> Edit
+                <Pencil size={14} /> {t('common.edit')}
               </button>
             )}
           </div>
@@ -268,20 +270,20 @@ export default function ProfilePage() {
                 type="text"
                 value={form.displayName}
                 onChange={e => setForm({ ...form, displayName: e.target.value })}
-                placeholder="Display name"
+                placeholder={t('profile.displayName')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
               />
               <input
                 type="text"
                 value={form.title}
                 onChange={e => setForm({ ...form, title: e.target.value })}
-                placeholder="Title (e.g. Web Developer)"
+                placeholder={t('profile.titlePh')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
               />
               <textarea
                 value={form.bio}
                 onChange={e => setForm({ ...form, bio: e.target.value })}
-                placeholder="Bio — tell Pioneers about yourself"
+                placeholder={t('profile.bioPh')}
                 rows={3}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand resize-none"
               />
@@ -289,7 +291,7 @@ export default function ProfilePage() {
                 type="text"
                 value={form.location}
                 onChange={e => setForm({ ...form, location: e.target.value })}
-                placeholder="Location (e.g. Tunis, Tunisia)"
+                placeholder={t('profile.locationPh')}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
               />
               <select
@@ -297,20 +299,20 @@ export default function ProfilePage() {
                 onChange={e => setForm({ ...form, type: e.target.value })}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
               >
-                <option value="both">Client & Freelancer</option>
-                <option value="freelancer">Freelancer</option>
-                <option value="client">Client</option>
+                <option value="both">{t('header.both')}</option>
+                <option value="freelancer">{t('profile.typeFreelancer')}</option>
+                <option value="client">{t('profile.typeClient')}</option>
               </select>
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               <div className="flex gap-2">
                 <button onClick={saveProfile} disabled={savingProfile} className="btn-primary text-sm flex-1 disabled:opacity-60">
-                  {savingProfile ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Save'}
+                  {savingProfile ? <Loader2 size={14} className="animate-spin mx-auto" /> : t('common.save')}
                 </button>
                 <button
                   onClick={() => setEditingProfile(false)}
                   className="flex items-center justify-center gap-1 border border-gray-300 text-gray-600 text-sm font-medium px-4 rounded-full hover:bg-gray-50"
                 >
-                  <X size={14} /> Cancel
+                  <X size={14} /> {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -318,33 +320,33 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-600 whitespace-pre-line">{u.bio}</p>
           ) : (
             <p className="text-sm text-gray-500">
-              Add a display name, title and bio so Pioneers know who they're working with.
+              {t('profile.aboutEmpty')}
             </p>
           )}
         </section>
         {/* Solde */}
         <section className="card-surface p-5 flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Balance</p>
+            <p className="text-sm text-gray-500">{t('header.balance')}</p>
             <p className="font-heading font-bold text-2xl text-navy">
               {user.balance ?? 0} <span className="text-brand">π</span>
             </p>
           </div>
-          <Link to="/orders" className="btn-primary text-sm">My Orders</Link>
+          <Link to="/orders" className="btn-primary text-sm">{t('orders.title')}</Link>
         </section>
 
         {/* Wallet */}
         <section className="card-surface p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading font-semibold text-navy flex items-center gap-2">
-              <Wallet size={18} className="text-brand" /> Pi Wallet
+              <Wallet size={18} className="text-brand" /> {t('profile.wallet')}
             </h2>
             {!editing && (
               <button
                 onClick={() => { setDraft(serverWallet); setEditing(true); setWalletError(null); }}
                 className="text-sm text-brand font-medium flex items-center gap-1 hover:underline"
               >
-                <Pencil size={14} /> {serverWallet ? 'Edit' : 'Add'}
+                <Pencil size={14} /> {serverWallet ? t('common.edit') : t('common.add')}
               </button>
             )}
           </div>
@@ -363,13 +365,13 @@ export default function ProfilePage() {
               {walletError && <p className="text-xs text-red-600">{walletError}</p>}
               <div className="flex gap-2">
                 <button onClick={saveWallet} disabled={saving} className="btn-primary text-sm flex-1 disabled:opacity-60">
-                  {saving ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Save'}
+                  {saving ? <Loader2 size={14} className="animate-spin mx-auto" /> : t('common.save')}
                 </button>
                 <button
                   onClick={() => { setEditing(false); setWalletError(null); }}
                   className="flex items-center justify-center gap-1 border border-gray-300 text-gray-600 text-sm font-medium px-4 rounded-full hover:bg-gray-50"
                 >
-                  <X size={14} /> Cancel
+                  <X size={14} /> {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -386,7 +388,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             <p className="text-sm text-gray-500">
-              Add your public Pi address to receive payments.
+              {t('profile.walletEmpty')}
             </p>
           )}
         </section>
@@ -394,9 +396,9 @@ export default function ProfilePage() {
         {/* Raccourcis */}
         <section className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Orders',   icon: Package,       href: '/orders' },
-            { label: 'Messages', icon: MessageCircle, href: '/messages' },
-            { label: 'Sell',     icon: PlusCircle,    href: '/create-service' },
+            { label: 'nav.orders',        icon: Package,       href: '/orders' },
+            { label: 'nav.messages',      icon: MessageCircle, href: '/messages' },
+            { label: 'profile.shortSell', icon: PlusCircle,    href: '/create-service' },
           ].map(item => (
             <Link
               key={item.label}
@@ -404,7 +406,7 @@ export default function ProfilePage() {
               className="card-surface-hover p-4 flex flex-col items-center gap-2 text-center"
             >
               <item.icon size={22} className="text-brand" />
-              <span className="text-xs font-medium text-gray-700">{item.label}</span>
+              <span className="text-xs font-medium text-gray-700">{t(item.label)}</span>
             </Link>
           ))}
         </section>
@@ -414,7 +416,7 @@ export default function ProfilePage() {
           onClick={logout}
           className="w-full flex items-center justify-center gap-2 border border-red-200 text-red-600 font-medium text-sm py-3 rounded-full hover:bg-red-50 transition-colors"
         >
-          <LogOut size={16} /> Log out
+          <LogOut size={16} /> {t('header.logout')}
         </button>
       </div>
     </main>
