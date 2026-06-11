@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, User, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/i18n';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
@@ -35,6 +36,7 @@ function getMyId(): string | null {
 
 export default function MessagesPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages]           = useState<Message[]>([]);
   const [activeConv, setActiveConv]       = useState<Conversation | null>(null);
@@ -132,19 +134,19 @@ export default function MessagesPage() {
     <div className="flex h-[calc(100vh-8rem)] bg-gray-50 max-w-4xl mx-auto border-x border-gray-100 overflow-hidden">
       <div className={`flex flex-col w-full md:w-80 shrink-0 bg-white border-r border-gray-200 ${showChat ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-800 text-lg">Messages</h2>
+          <h2 className="font-semibold text-gray-800 text-lg">{t('nav.messages')}</h2>
         </div>
         <div className="flex-1 overflow-y-auto">
           {loadingConvs ? (
             <div className="flex items-center justify-center h-32 gap-2 text-gray-400">
               <Loader2 size={18} className="animate-spin" />
-              <span className="text-sm">Loading...</span>
+              <span className="text-sm">{t('common.loading')}</span>
             </div>
           ) : conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400 gap-2 px-6 text-center">
               <MessageSquare size={40} className="text-gray-300" />
-              <p className="font-medium text-gray-600">No conversations yet</p>
-              <p className="text-xs">Messages from your orders will appear here.</p>
+              <p className="font-medium text-gray-600">{t('messages.none')}</p>
+              <p className="text-xs">{t('messages.noneHint')}</p>
             </div>
           ) : (
             conversations.map(conv => (
@@ -181,7 +183,7 @@ export default function MessagesPage() {
         {!activeConv ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
             <MessageSquare size={48} className="text-gray-300" />
-            <p className="text-sm">Select a conversation</p>
+            <p className="text-sm">{t('messages.select')}</p>
           </div>
         ) : (
           <>
@@ -205,7 +207,7 @@ export default function MessagesPage() {
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
-                  <p className="text-sm">Start the conversation!</p>
+                  <p className="text-sm">{t('messages.start')}</p>
                 </div>
               ) : (
                 messages.map(msg => {
@@ -232,7 +234,7 @@ export default function MessagesPage() {
                 type="text"
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
-                placeholder="Write a message..."
+                placeholder={t('messages.writePh')}
                 className="flex-1 px-4 py-2 bg-gray-100 border border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-orange-500 transition-all"
                 disabled={sending}
               />
