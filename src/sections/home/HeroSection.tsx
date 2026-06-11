@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/i18n';
 
 export function HeroSection() {
+  const { t } = useLanguage();
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-[#FFF5F0] via-[#F8F0FF] to-[#F0F4FF] rounded-b-[32px]">
       <div className="absolute top-10 left-10 w-[300px] h-[300px] bg-brand/8 rounded-full blur-[80px]" />
@@ -25,7 +27,7 @@ export function HeroSection() {
           >
             <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 text-xs font-medium px-3 py-1.5 rounded-full mb-6">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse-dot" />
-              ✓ Mainnet · Pi Network Secured
+              {t('home.badge')}
             </span>
           </motion.div>
 
@@ -35,8 +37,8 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            Get Your Work Done Safely{' '}
-            <span className="text-brand">with Pi π</span>
+            {t('home.heroTitle1')}{' '}
+            <span className="text-brand">{t('home.heroTitle2')}</span>
           </motion.h1>
 
           <motion.p
@@ -45,7 +47,7 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.45 }}
           >
-            The first Arabic & global secure freelance platform powered by Pi. Connecting talent with opportunity through our smart Escrow system.
+            {t('home.heroSub')}
           </motion.p>
 
           <motion.div
@@ -55,11 +57,11 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.6 }}
           >
             <Link to="/marketplace" className="btn-primary inline-flex items-center justify-center gap-2 text-base py-3.5 px-7">
-              Explore Services
+              {t('home.explore')}
               <ArrowRight size={18} />
             </Link>
             <Link to="/create-service" className="btn-secondary inline-flex items-center justify-center text-base py-3.5 px-7">
-              Join as Freelancer
+              {t('home.join')}
             </Link>
           </motion.div>
         </div>
