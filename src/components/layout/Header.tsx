@@ -4,12 +4,13 @@ import { Home, ShoppingCart, Package, MessageCircle, Bell, Search, Menu, X, LogO
 import { useIsDesktop, useIsMobile } from '@/hooks/useMediaQuery';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePiAuth } from '@/hooks/usePiAuth';
+import { useLanguage, LanguageSwitcher } from '@/i18n';
 
 const navItems = [
-  { label: 'Home', icon: Home, href: '/' },
-  { label: 'Marketplace', icon: ShoppingCart, href: '/marketplace' },
-  { label: 'My Orders', icon: Package, href: '/orders' },
-  { label: 'Messages', icon: MessageCircle, href: '/messages' },
+  { key: 'nav.home',        icon: Home,          href: '/' },
+  { key: 'nav.marketplace', icon: ShoppingCart,  href: '/marketplace' },
+  { key: 'nav.myOrders',    icon: Package,       href: '/orders' },
+  { key: 'nav.messages',    icon: MessageCircle, href: '/messages' },
 ];
 
 const PI_BROWSER_LINKS = {
@@ -27,6 +28,7 @@ export function Header() {
   const [showPiModal, setShowPiModal] = useState(false);
 
   const { user, loading, error, loggedIn, inPiBrowser, login, logout } = usePiAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -64,8 +66,8 @@ export function Header() {
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
                   return (
-                    <Link key={item.label} to={item.href} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive ? 'text-brand bg-brand-light' : 'text-gray-500 hover:text-brand hover:bg-gray-50'}`}>
-                      <item.icon size={18} /><span>{item.label}</span>
+                    <Link key={item.key} to={item.href} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive ? 'text-brand bg-brand-light' : 'text-gray-500 hover:text-brand hover:bg-gray-50'}`}>
+                      <item.icon size={18} /><span>{t(item.key)}</span>
                     </Link>
                   );
                 })}
@@ -73,6 +75,7 @@ export function Header() {
             )}
 
             <div className="flex items-center gap-2">
+              {!isMobile && <LanguageSwitcher />}
               <button onClick={() => setSearchOpen(!searchOpen)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors"><Search size={20} className="text-gray-500" /></button>
               {loggedIn && user && (
                 <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative hidden sm:block">
@@ -95,7 +98,7 @@ export function Header() {
                   </div>
                 ) : (
                   <button onClick={handleLoginClick} className="btn-primary text-sm py-2 px-5">
-                    {loading ? 'Connecting...' : 'Login with π'}
+                    {loading ? t('header.connecting') : t('header.login')}
                   </button>
                 )}
               </div>
@@ -110,7 +113,7 @@ export function Header() {
               <div className="section-container py-4">
                 <div className="flex items-center gap-3 max-w-2xl mx-auto">
                   <Search size={20} className="text-gray-400 shrink-0" />
-                  <input type="text" placeholder="Search services, freelancers..." className="flex-1 bg-transparent text-lg outline-none placeholder:text-gray-400" autoFocus />
+                  <input type="text" placeholder={t('header.search')} className="flex-1 bg-transparent text-lg outline-none placeholder:text-gray-400" autoFocus />
                   <button onClick={() => setSearchOpen(false)} className="p-2 rounded-lg hover:bg-gray-100"><X size={20} className="text-gray-400" /></button>
                 </div>
               </div>
@@ -125,19 +128,24 @@ export function Header() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black z-50" onClick={() => setMobileDrawerOpen(false)} />
             <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ type: 'tween', duration: 0.3 }} className="fixed left-0 top-0 bottom-0 w-[280px] bg-white z-50 shadow-xl">
               <div className="p-4">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <Link to="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center"><span className="text-white font-bold text-sm">π</span></div>
                     <span className="font-heading font-bold text-lg text-navy">Work<span className="text-brand">π</span>Serv</span>
                   </Link>
                   <button onClick={() => setMobileDrawerOpen(false)} className="p-2 rounded-lg hover:bg-gray-100"><X size={20} /></button>
                 </div>
+
+                <div className="mb-4 flex justify-center">
+                  <LanguageSwitcher />
+                </div>
+
                 <nav className="space-y-1">
                   {navItems.map((item) => {
                     const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
                     return (
-                      <Link key={item.label} to={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive ? 'text-brand bg-brand-light' : 'text-gray-600 hover:bg-gray-50'}`}>
-                        <item.icon size={20} /><span>{item.label}</span>
+                      <Link key={item.key} to={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isActive ? 'text-brand bg-brand-light' : 'text-gray-600 hover:bg-gray-50'}`}>
+                        <item.icon size={20} /><span>{t(item.key)}</span>
                       </Link>
                     );
                   })}
@@ -151,26 +159,26 @@ export function Header() {
                         </div>
                         <div>
                           <p className="font-medium text-navy">@{user.username}</p>
-                          <p className="text-sm text-gray-500">{user.type === 'both' ? 'Client & Freelancer' : user.type}</p>
+                          <p className="text-sm text-gray-500">{user.type === 'both' ? t('header.both') : user.type}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between px-2 py-2 bg-brand-light rounded-xl">
-                        <span className="text-sm text-gray-600">Balance</span>
+                        <span className="text-sm text-gray-600">{t('header.balance')}</span>
                         <span className="font-bold text-brand">π {user.balance?.toFixed(2) || '0.00'}</span>
                       </div>
                       {(user.newOrders > 0 || user.unreadMessages > 0) && (
                         <div className="flex gap-2">
-                          {user.newOrders > 0 && <span className="flex-1 text-center py-1 bg-orange-50 text-orange-600 text-xs font-medium rounded-lg">{user.newOrders} new orders</span>}
-                          {user.unreadMessages > 0 && <span className="flex-1 text-center py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-lg">{user.unreadMessages} messages</span>}
+                          {user.newOrders > 0 && <span className="flex-1 text-center py-1 bg-orange-50 text-orange-600 text-xs font-medium rounded-lg">{user.newOrders} {t('header.newOrders')}</span>}
+                          {user.unreadMessages > 0 && <span className="flex-1 text-center py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-lg">{user.unreadMessages} {t('header.messages')}</span>}
                         </div>
                       )}
                       <button onClick={() => { logout(); setMobileDrawerOpen(false); }} className="w-full flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
-                        <LogOut size={16} /><span>Logout</span>
+                        <LogOut size={16} /><span>{t('header.logout')}</span>
                       </button>
                     </div>
                   ) : (
                     <button onClick={() => { handleLoginClick(); setMobileDrawerOpen(false); }} className="btn-primary w-full text-center">
-                      {loading ? 'Connecting...' : 'Login with π'}
+                      {loading ? t('header.connecting') : t('header.login')}
                     </button>
                   )}
                 </div>
@@ -189,20 +197,19 @@ export function Header() {
                 <div className="w-16 h-16 bg-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white font-bold text-3xl">π</span>
                 </div>
-                <h3 className="font-heading font-bold text-xl text-navy mb-2">Open in Pi Browser</h3>
+                <h3 className="font-heading font-bold text-xl text-navy mb-2">{t('pimodal.title')}</h3>
                 <div className="space-y-2 mb-6">
-                  <p className="text-gray-600 text-sm">Open WorkPiServ in the Pi Browser to login and make real transactions.</p>
-                  <p className="text-gray-500 text-sm">Ouvrez WorkPiServ dans Pi Browser pour vous connecter.</p>
+                  <p className="text-gray-600 text-sm">{t('pimodal.body')}</p>
                 </div>
                 <div className="space-y-3">
                   <a href={PI_BROWSER_LINKS.android} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-navy text-white py-3 px-4 rounded-full font-medium hover:bg-navy/90 transition-colors">
-                    <Smartphone size={18} />Download Pi Browser — Android
+                    <Smartphone size={18} />{t('pimodal.android')}
                   </a>
                   <a href={PI_BROWSER_LINKS.ios} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full border-2 border-navy text-navy py-3 px-4 rounded-full font-medium hover:bg-gray-50 transition-colors">
-                    <Smartphone size={18} />Download Pi Browser — iOS
+                    <Smartphone size={18} />{t('pimodal.ios')}
                   </a>
                 </div>
-                <button onClick={() => setShowPiModal(false)} className="mt-4 text-gray-400 text-sm hover:text-gray-600 transition-colors">Continue browsing in demo mode</button>
+                <button onClick={() => setShowPiModal(false)} className="mt-4 text-gray-400 text-sm hover:text-gray-600 transition-colors">{t('pimodal.demo')}</button>
               </div>
             </motion.div>
           </>
