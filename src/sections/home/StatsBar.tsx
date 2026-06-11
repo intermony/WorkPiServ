@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import CountUp from 'react-countup';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
+import { useLanguage } from '@/i18n';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
@@ -11,6 +12,7 @@ interface Stats {
 }
 
 export function StatsBar() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState<Stats>({ services: 0, freelancers: 0, transactions: 0 });
 
   useEffect(() => {
@@ -23,9 +25,9 @@ export function StatsBar() {
   }, []);
 
   const items = [
-    { value: stats.services,     suffix: '+', label: 'Services Available' },
-    { value: stats.freelancers,  suffix: '+', label: 'Active Freelancers' },
-    { value: stats.transactions, suffix: '+', label: 'Pi Transactions Secured' },
+    { value: stats.services,     suffix: '+', label: 'home.statServices' },
+    { value: stats.freelancers,  suffix: '+', label: 'home.statFreelancers' },
+    { value: stats.transactions, suffix: '+', label: 'home.statTransactions' },
   ];
 
   return (
@@ -39,7 +41,7 @@ export function StatsBar() {
                   <CountUp end={stat.value} duration={1.5} separator="," suffix={stat.suffix} />
                 </div>
                 <p className="mt-1 text-sm text-gray-500 uppercase tracking-wider font-medium">
-                  {stat.label}
+                  {t(stat.label)}
                 </p>
               </div>
             </ScrollReveal>
