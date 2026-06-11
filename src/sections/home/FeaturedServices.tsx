@@ -3,21 +3,23 @@ import { ArrowRight } from 'lucide-react';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { ServiceCard } from '@/components/shared/ServiceCard';
 import { featuredServices } from '@/data/services';
+import { useLanguage } from '@/i18n';
 
 export function FeaturedServices() {
+  const { t } = useLanguage();
   return (
     <section className="py-16 lg:py-24">
       <div className="section-container">
         <ScrollReveal>
           <div className="flex items-center justify-between mb-8">
             <h2 className="font-heading font-bold text-2xl lg:text-3xl text-navy">
-              Featured Services
+              {t('home.featured')}
             </h2>
             <Link
               to="/marketplace"
               className="text-sm font-medium text-brand hover:underline flex items-center gap-1"
             >
-              View All <ArrowRight size={16} />
+              {t('home.viewAll')} <ArrowRight size={16} />
             </Link>
           </div>
         </ScrollReveal>
