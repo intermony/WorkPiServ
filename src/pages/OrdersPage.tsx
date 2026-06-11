@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Shield, Loader2, Truck, CheckCircle2 } from 'lucide-react';
 import { usePiAuth } from '@/hooks/usePiAuth';
+import { useLanguage } from '@/i18n';
 import type { Order, OrderStatus } from '@/types';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
@@ -9,19 +10,19 @@ const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onre
 // Order enrichi avec les IDs bruts pour savoir si on est acheteur ou vendeur
 type OrderEx = Order & { buyerRawId: string; freelancerRawId: string };
 
-const statusConfig: Record<OrderStatus, { label: string; color: string; bg: string }> = {
-  active:          { label: 'Active',          color: 'text-blue-600',   bg: 'bg-blue-50' },
-  pending_payment: { label: 'Pending Payment', color: 'text-amber-600',  bg: 'bg-amber-50' },
-  in_progress:     { label: 'In Progress',     color: 'text-purple-600', bg: 'bg-purple-50' },
-  delivered:       { label: 'Delivered',       color: 'text-green-600',  bg: 'bg-green-50' },
-  completed:       { label: 'Completed',       color: 'text-green-600',  bg: 'bg-green-50' },
-  cancelled:       { label: 'Cancelled',       color: 'text-red-600',    bg: 'bg-red-50' },
+const statusConfig: Record<OrderStatus, { labelKey: string; color: string; bg: string }> = {
+  active:          { labelKey: 'orders.status.active',          color: 'text-blue-600',   bg: 'bg-blue-50' },
+  pending_payment: { labelKey: 'orders.status.pending_payment', color: 'text-amber-600',  bg: 'bg-amber-50' },
+  in_progress:     { labelKey: 'orders.status.in_progress',     color: 'text-purple-600', bg: 'bg-purple-50' },
+  delivered:       { labelKey: 'orders.status.delivered',       color: 'text-green-600',  bg: 'bg-green-50' },
+  completed:       { labelKey: 'orders.status.completed',       color: 'text-green-600',  bg: 'bg-green-50' },
+  cancelled:       { labelKey: 'orders.status.cancelled',       color: 'text-red-600',    bg: 'bg-red-50' },
 };
 
 // Tolère les anciens statuts inconnus (ex. "pending" des premières versions)
 function getStatusConfig(status: string) {
   return statusConfig[status as OrderStatus]
-    ?? { label: status, color: 'text-gray-600', bg: 'bg-gray-100' };
+    ?? { labelKey: status, color: 'text-gray-600', bg: 'bg-gray-100' };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,6 +62,7 @@ function normalizeOrder(o: any): OrderEx {
 
 export default function OrdersPage() {
   const { user } = usePiAuth();
+  const { t } = useLanguage();
   const [orders, setOrders]             = useState<OrderEx[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(false);
@@ -86,7 +88,7 @@ export default function OrdersPage() {
       const newStatus: OrderStatus = action === 'deliver' ? 'delivered' : 'completed';
       setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
     } catch {
-      setActionError("Action failed. Please try again.");
+      setActionError(t('orders.actionFailed'));
     } finally {
       setActing(false);
     }
@@ -120,7 +122,7 @@ export default function OrdersPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Loading your orders...</p>
+          <p className="text-gray-500 text-sm">{t('orders.loading')}</p>
         </div>
       </main>
     );
@@ -131,9 +133,9 @@ export default function OrdersPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center px-6">
           <Package size={48} className="text-gray-300 mx-auto mb-4" />
-          <h2 className="font-semibold text-gray-700 mb-2">Could not load orders</h2>
-          <p className="text-sm text-gray-500 mb-4">Please check your connection and try again.</p>
-          <Link to="/" className="btn-primary">Back to Home</Link>
+          <h2 className="font-semibold text-gray-700 mb-2">{t('orders.loadError')}</h2>
+          <p className="text-sm text-gray-500 mb-4">{t('orders.checkConnection')}</p>
+          <Link to="/" className="btn-primary">{t('orders.backHome')}</Link>
         </div>
       </main>
     );
@@ -145,20 +147,20 @@ export default function OrdersPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="section-container py-8">
           <div className="text-sm text-gray-500 mb-2">
-            <Link to="/" className="text-brand hover:underline">Home</Link>
+            <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-700">My Orders</span>
+            <span className="text-gray-700">{t('orders.title')}</span>
           </div>
-          <h1 className="font-heading font-bold text-3xl text-navy">My Orders</h1>
+          <h1 className="font-heading font-bold text-3xl text-navy">{t('orders.title')}</h1>
 
           {/* Status tabs */}
           <div className="flex gap-2 mt-6 overflow-x-auto pb-1">
             {(['all', 'active', 'in_progress', 'delivered', 'completed', 'pending_payment', 'cancelled'] as const).map(key => {
               const count = key === 'all' ? orders.length : orders.filter(o => o.status === key).length;
               const labels: Record<string, string> = {
-                all: 'All', active: 'Active', in_progress: 'In Progress',
-                delivered: 'Delivered', completed: 'Completed',
-                pending_payment: 'Pending', cancelled: 'Cancelled',
+                all: 'orders.status.all', active: 'orders.status.active', in_progress: 'orders.status.in_progress',
+                delivered: 'orders.status.delivered', completed: 'orders.status.completed',
+                pending_payment: 'orders.status.pending', cancelled: 'orders.status.cancelled',
               };
               return (
                 <button
@@ -168,7 +170,7 @@ export default function OrdersPage() {
                     activeStatus === key ? 'bg-brand-light text-brand' : 'text-gray-500 hover:bg-gray-50'
                   }`}
                 >
-                  {labels[key]} <span className="opacity-60 text-xs">({count})</span>
+                  {t(labels[key])} <span className="opacity-60 text-xs">({count})</span>
                 </button>
               );
             })}
@@ -181,9 +183,9 @@ export default function OrdersPage() {
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <Package size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700">No orders yet</h3>
-            <p className="text-sm text-gray-500 mt-1 mb-4">When you place an order, it will appear here</p>
-            <Link to="/marketplace" className="btn-primary">Browse Services</Link>
+            <h3 className="text-lg font-semibold text-gray-700">{t('orders.none')}</h3>
+            <p className="text-sm text-gray-500 mt-1 mb-4">{t('orders.noneHint')}</p>
+            <Link to="/marketplace" className="btn-primary">{t('orders.browse')}</Link>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-6">
@@ -211,7 +213,7 @@ export default function OrdersPage() {
                         <p className="text-xs text-gray-500 mt-1">{order.freelancer.name}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>
-                            {sc.label}
+                            {t(sc.labelKey)}
                           </span>
                           <span className="text-sm font-bold text-brand">π {order.price}</span>
                         </div>
@@ -248,11 +250,11 @@ export default function OrdersPage() {
                   <div className="mt-4 bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-center gap-3">
                     <Shield size={22} className="text-purple-600 shrink-0" />
                     <div className="flex-1">
-                      <p className="font-semibold text-purple-700 text-sm">Payment Protected in Escrow</p>
-                      <p className="text-xs text-gray-500">π {activeOrder.price} held safely until delivery confirmed</p>
+                      <p className="font-semibold text-purple-700 text-sm">{t('orders.escrowTitle')}</p>
+                      <p className="text-xs text-gray-500">{t('orders.escrowBody').replace('{n}', String(activeOrder.price))}</p>
                     </div>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusConfig(activeOrder.status).bg} ${getStatusConfig(activeOrder.status).color}`}>
-                      {getStatusConfig(activeOrder.status).label}
+                      {t(getStatusConfig(activeOrder.status).labelKey)}
                     </span>
                   </div>
 
@@ -265,7 +267,7 @@ export default function OrdersPage() {
                       className="btn-primary w-full mt-4 py-3 flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                       {acting ? <Loader2 size={16} className="animate-spin" /> : <Truck size={16} />}
-                      Mark as Delivered
+                      {t('orders.markDelivered')}
                     </button>
                   )}
 
@@ -277,17 +279,17 @@ export default function OrdersPage() {
                         className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         {acting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                        Confirm & Release π {activeOrder.price}
+                        {t('orders.confirmRelease').replace('{n}', String(activeOrder.price))}
                       </button>
                       <p className="text-xs text-gray-500 text-center mt-2">
-                        Only confirm once you've reviewed the delivered work — this releases the escrow funds to the freelancer.
+                        {t('orders.confirmHint')}
                       </p>
                     </div>
                   )}
 
                   {activeOrder.status === 'completed' && (
                     <div className="mt-4 flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded-xl py-3">
-                      <CheckCircle2 size={16} /> Order completed — funds released
+                      <CheckCircle2 size={16} /> {t('orders.completedBanner')}
                     </div>
                   )}
 
@@ -298,12 +300,12 @@ export default function OrdersPage() {
 
                 {/* Deliverables */}
                 <div className="card-surface p-6">
-                  <h3 className="font-semibold text-navy mb-3">Deliverables</h3>
+                  <h3 className="font-semibold text-navy mb-3">{t('orders.deliverables')}</h3>
                   {(activeOrder.deliverables ?? []).length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-6">
                       {activeOrder.status === 'in_progress'
-                        ? 'Work in progress — deliverables will appear here.'
-                        : 'No deliverables yet.'}
+                        ? t('orders.workInProgress')
+                        : t('orders.noDeliverables')}
                     </p>
                   ) : (
                     <div className="space-y-2">
