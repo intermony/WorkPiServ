@@ -1,306 +1,287 @@
-/* ════════════════════════════════════════════════════════════
-   WorkPiServ — Panneau d'administration (page cachée /admin)
-   Fichier : src/pages/AdminPage.tsx
-   - Accès réservé : role === 'admin' (vérifié CÔTÉ SERVEUR via /api/auth/me)
-   - 4 onglets : Statistiques / Utilisateurs / Services / Commandes
-   - Modération : suppression de services, bannissement d'utilisateurs
-   ════════════════════════════════════════════════════════════ */
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Shield, Users, Package, ShoppingBag, BarChart3,
-  Trash2, Ban, CheckCircle2, RefreshCw, AlertTriangle,
-} from 'lucide-react';
-import { useLanguage } from '@/i18n';
-import {
-  adminGetStats, adminGetUsers, adminGetServices, adminGetOrders,
-  adminDeleteService, adminSetUserBan,
-  type AdminStats, type AdminUser, type AdminService, type AdminOrder,
-} from '@/lib/api';
+import { Shield, RefreshCw, BarChart2, Users, Package, X, Send, MessageCircle, Ban, CheckCircle } from 'lucide-react';
+import { usePiAuth } from '@/hooks/usePiAuth';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
+const API = import.meta.env.VITE_API_URL || 'https://workpiserv-api.onrender.com';
 
-type Tab = 'stats' | 'users' | 'services' | 'orders';
+interface UserRow {
+  _id: string;
+  username: string;
+  pi_username?: string;
+  displayName?: string;
+  avatar?: string;
+  role?: string;
+  banned?: boolean;
+  createdAt?: string;
+}
 
-const STATUS_COLORS: Record<string, string> = {
-  completed:   'bg-green-100 text-green-700',
-  delivered:   'bg-blue-100 text-blue-700',
-  in_progress: 'bg-amber-100 text-amber-700',
-  pending:     'bg-gray-100 text-gray-600',
-  cancelled:   'bg-red-100 text-red-600',
-};
+interface Stats {
+  users: number;
+  services: number;
+  orders: number;
+  completedOrders: number;
+  pendingOrders: number;
+  piVolume: number;
+}
 
-function formatDate(iso?: string): string {
-  if (!iso) return '—';
-  try { return new Date(iso).toLocaleDateString(); } catch { return '—'; }
+interface ContactModal {
+  open: boolean;
+  user: UserRow | null;
+  message: string;
+  sending: boolean;
+  sent: boolean;
+  error: string;
 }
 
 export default function AdminPage() {
+  const { user, loggedIn } = usePiAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
 
-  // ── Garde d'accès : on revérifie le rôle auprès du SERVEUR
-  // (jamais confiance au localStorage seul — il est modifiable)
-  const [access, setAccess] = useState<'checking' | 'granted'>('checking');
+  const [tab, setTab] = useState<'stats' | 'users' | 'services'>('stats');
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [banConfirm, setBanConfirm] = useState<string | null>(null);
 
-  const [tab, setTab] = useState<Tab>('stats');
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
-  const [stats, setStats]       = useState<AdminStats | null>(null);
-  const [users, setUsers]       = useState<AdminUser[]>([]);
-  const [services, setServices] = useState<AdminService[]>([]);
-  const [orders, setOrders]     = useState<AdminOrder[]>([]);
+  const [contact, setContact] = useState<ContactModal>({
+    open: false, user: null, message: '', sending: false, sent: false, error: ''
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const token = localStorage.getItem('workpiserv_token');
-      if (!token) { navigate('/', { replace: true }); return; }
-      try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) { navigate('/', { replace: true }); return; }
-        const me = await res.json();
-        if (cancelled) return;
-        if (me?.role === 'admin') setAccess('granted');
-        else navigate('/', { replace: true });
-      } catch {
-        if (!cancelled) navigate('/', { replace: true });
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [navigate]);
+  const token = () => localStorage.getItem('workpiserv_token') || '';
 
-  // ── Chargement des données de l'onglet actif
-  const loadTab = useCallback(async (which: Tab) => {
+  const isAdmin = user?.username === 'alibentaher';
+
+  const fetchStats = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      if (which === 'stats')    setStats(await adminGetStats());
-      if (which === 'users')    setUsers(await adminGetUsers());
-      if (which === 'services') setServices(await adminGetServices());
-      if (which === 'orders')   setOrders(await adminGetOrders());
-    } catch {
-      setError(t('admin.error'));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+      const r = await fetch(`${API}/api/admin/stats`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      setStats(data);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
 
-  useEffect(() => {
-    if (access === 'granted') loadTab(tab);
-  }, [access, tab, loadTab]);
-
-  // ── Actions de modération
-  const handleDeleteService = async (id: string) => {
-    if (!window.confirm(t('admin.deleteConfirm'))) return;
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
     try {
-      await adminDeleteService(id);
-      setServices(prev => prev.filter(s => s._id !== id));
-      if (stats) setStats({ ...stats, services: Math.max(0, stats.services - 1) });
+      const r = await fetch(`${API}/api/admin/users`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!r.ok) throw new Error();
+      setUsers(await r.json());
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { if (loggedIn && isAdmin) { fetchStats(); fetchUsers(); } }, [loggedIn, isAdmin]);
+
+  const refresh = () => { fetchStats(); if (tab === 'users') fetchUsers(); };
+
+  const banUser = async (userId: string) => {
+    try {
+      await fetch(`${API}/api/admin/users/${userId}/ban`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token()}` }
+      });
+      setUsers(u => u.map(x => x._id === userId ? { ...x, banned: !x.banned } : x));
+    } catch { /* silent */ }
+    setBanConfirm(null);
+  };
+
+  // ── CONTACT MODAL ──
+  const openContact = (u: UserRow) => setContact({ open: true, user: u, message: '', sending: false, sent: false, error: '' });
+  const closeContact = () => setContact(c => ({ ...c, open: false }));
+
+  const sendMessage = async () => {
+    if (!contact.message.trim() || !contact.user) return;
+    setContact(c => ({ ...c, sending: true, error: '' }));
+    try {
+      const r = await fetch(`${API}/api/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ recver_id: contact.user._id, text: contact.message.trim() })
+      });
+      if (!r.ok) throw new Error();
+      setContact(c => ({ ...c, sending: false, sent: true, message: '' }));
+      setTimeout(() => setContact(c => ({ ...c, open: false, sent: false })), 1800);
     } catch {
-      setError(t('admin.error'));
+      setContact(c => ({ ...c, sending: false, error: "Échec de l'envoi. Réessayez." }));
     }
   };
 
-  const handleToggleBan = async (u: AdminUser) => {
-    const verb = u.banned ? t('admin.unban') : t('admin.ban');
-    if (!window.confirm(`${verb} @${u.pi_username || u.username} ?`)) return;
-    try {
-      await adminSetUserBan(u._id, !u.banned);
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, banned: !u.banned } : x));
-    } catch {
-      setError(t('admin.error'));
-    }
-  };
-
-  // ── Écran d'attente pendant la vérification du rôle
-  if (access === 'checking') {
+  if (!loggedIn || !isAdmin) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-gray-500">
-        <Shield size={32} className="text-brand animate-pulse" />
-        <p className="text-sm">{t('admin.checking')}</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Shield size={48} className="text-gray-300 mx-auto" />
+          <p className="text-gray-500">Accès réservé à l'administrateur.</p>
+          <button onClick={() => navigate('/')} className="btn-primary text-sm">Retour à l'accueil</button>
+        </div>
       </div>
     );
   }
 
-  const tabs: { id: Tab; key: string; icon: typeof Shield }[] = [
-    { id: 'stats',    key: 'admin.tabStats',    icon: BarChart3 },
-    { id: 'users',    key: 'admin.tabUsers',    icon: Users },
-    { id: 'services', key: 'admin.tabServices', icon: Package },
-    { id: 'orders',   key: 'admin.tabOrders',   icon: ShoppingBag },
-  ];
-
   return (
-    <main className="section-container py-6 pb-24 md:pb-10">
-      {/* En-tête */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-brand rounded-full flex items-center justify-center">
-            <Shield size={18} className="text-white" />
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-brand/10 flex items-center justify-center">
+            <Shield size={24} className="text-brand" />
           </div>
-          <h1 className="font-heading font-bold text-xl text-navy">{t('admin.title')}</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-navy">Panneau d'administration</h1>
+            <p className="text-sm text-gray-500">WorkπServ</p>
+          </div>
         </div>
-        <button
-          onClick={() => loadTab(tab)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          aria-label={t('admin.refresh')}
-        >
+        <button onClick={refresh} disabled={loading} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
           <RefreshCw size={18} className={`text-gray-500 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      {/* Onglets — défilement horizontal sur mobile */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-1 px-1">
-        {tabs.map(({ id, key, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-              tab === id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <Icon size={15} />
-            {t(key)}
+      {/* Tabs */}
+      <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-2xl">
+        {([['stats','Statistiques',BarChart2],['users','Utilisateurs',Users],['services','Services',Package]] as const).map(([key,label,Icon]) => (
+          <button key={key} onClick={() => { setTab(key); if (key === 'users') fetchUsers(); }}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium transition-all ${tab === key ? 'bg-brand text-white shadow' : 'text-gray-600 hover:bg-white'}`}>
+            <Icon size={15} />{label}
           </button>
         ))}
       </div>
 
-      {/* Erreur */}
-      {error && (
-        <div className="flex items-center gap-2 p-3 mb-4 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
-          <AlertTriangle size={16} />
-          {error}
+      {/* Stats */}
+      {tab === 'stats' && stats && (
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: 'Pioneers inscrits', value: stats.users },
+            { label: 'Services actifs', value: stats.services },
+            { label: 'Commandes totales', value: stats.orders },
+            { label: 'Volume π (terminées)', value: `π ${(stats.piVolume || 0).toFixed(2)}`, highlight: true },
+            { label: 'Commandes terminées', value: stats.completedOrders ?? '-' },
+            { label: 'Commandes en attente', value: stats.pendingOrders ?? 0 },
+          ].map((s, i) => (
+            <div key={i} className={`rounded-2xl p-4 ${s.highlight ? 'bg-brand/5 border border-brand/20' : 'bg-white border border-gray-100'}`}>
+              <p className={`text-2xl font-bold ${s.highlight ? 'text-brand' : 'text-navy'}`}>{s.value}</p>
+              <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* ════════ ONGLET STATISTIQUES ════════ */}
-      {tab === 'stats' && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {stats ? (
-            <>
-              <StatCard label={t('admin.statUsers')}     value={String(stats.users)} />
-              <StatCard label={t('admin.statServices')}  value={String(stats.services)} />
-              <StatCard label={t('admin.statOrders')}    value={String(stats.orders)} />
-              <StatCard label={t('admin.statVolume')}    value={`π ${stats.totalVolume.toFixed(2)}`} highlight />
-              <StatCard label={t('admin.statCompleted')} value={String(stats.completedOrders)} />
-              <StatCard label={t('admin.statPending')}   value={String(stats.pendingOrders)} />
-            </>
-          ) : !loading && <p className="col-span-2 text-gray-400 text-sm">{t('admin.empty')}</p>}
-        </div>
-      )}
-
-      {/* ════════ ONGLET UTILISATEURS ════════ */}
+      {/* Users */}
       {tab === 'users' && (
         <div className="space-y-2">
-          {users.map(u => (
-            <div key={u._id} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl">
-              <div className="w-10 h-10 bg-brand-light rounded-full flex items-center justify-center shrink-0">
-                <span className="text-brand font-bold text-sm">
-                  {(u.pi_username || u.username || '?').charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-navy text-sm truncate">@{u.pi_username || u.username}</span>
-                  {u.role === 'admin' && (
-                    <span className="px-2 py-0.5 bg-brand-light text-brand text-[10px] font-bold rounded-full uppercase">admin</span>
-                  )}
-                  {u.banned && (
-                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold rounded-full uppercase">{t('admin.banned')}</span>
-                  )}
+          {users.length === 0 && !loading && <p className="text-center text-gray-400 py-8">Aucun utilisateur</p>}
+          {users.map(u => {
+            const name = u.displayName || u.username || u.pi_username || '?';
+            const initial = name.charAt(0).toUpperCase();
+            const isSelf = u.username === 'alibentaher' || u.pi_username === 'alibentaher';
+            return (
+              <div key={u._id} className={`bg-white rounded-2xl p-4 flex items-center gap-3 border ${u.banned ? 'border-red-100 opacity-60' : 'border-gray-100'}`}>
+                {u.avatar
+                  ? <img src={u.avatar} alt={name} className="w-10 h-10 rounded-full object-cover" />
+                  : <span className="w-10 h-10 rounded-full bg-brand/10 text-brand font-bold flex items-center justify-center">{initial}</span>}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-navy truncate">@{u.username || u.pi_username}</span>
+                    {isSelf && <span className="text-[10px] font-bold bg-brand/10 text-brand px-2 py-0.5 rounded-full">ADMIN</span>}
+                    {u.banned && <span className="text-[10px] font-bold bg-red-100 text-red-500 px-2 py-0.5 rounded-full">BANNI</span>}
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Inscrit le : {u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '—'}
+                  </p>
                 </div>
-                <p className="text-xs text-gray-400">{t('admin.joined')} : {formatDate(u.createdAt)}</p>
+                {!isSelf && (
+                  <div className="flex gap-2 shrink-0">
+                    {/* Bouton Contact */}
+                    <button onClick={() => openContact(u)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-navy/5 hover:bg-navy/10 text-navy text-xs font-medium transition-colors">
+                      <MessageCircle size={13} /> Écrire
+                    </button>
+                    {/* Bouton Bannir */}
+                    {banConfirm === u._id ? (
+                      <div className="flex gap-1">
+                        <button onClick={() => banUser(u._id)} className="px-2 py-1.5 rounded-xl bg-red-500 text-white text-xs font-medium">Oui</button>
+                        <button onClick={() => setBanConfirm(null)} className="px-2 py-1.5 rounded-xl bg-gray-200 text-gray-600 text-xs">Non</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setBanConfirm(u._id)}
+                        className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${u.banned ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}>
+                        {u.banned ? <><CheckCircle size={13} /> Réactiver</> : <><Ban size={13} /> Bannir</>}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              {u.role !== 'admin' && (
-                <button
-                  onClick={() => handleToggleBan(u)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    u.banned
-                      ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                      : 'bg-red-50 text-red-600 hover:bg-red-100'
-                  }`}
-                >
-                  {u.banned ? <CheckCircle2 size={13} /> : <Ban size={13} />}
-                  {u.banned ? t('admin.unban') : t('admin.ban')}
-                </button>
-              )}
-            </div>
-          ))}
-          {!loading && users.length === 0 && <p className="text-gray-400 text-sm">{t('admin.empty')}</p>}
+            );
+          })}
         </div>
       )}
 
-      {/* ════════ ONGLET SERVICES ════════ */}
+      {/* Services tab placeholder */}
       {tab === 'services' && (
-        <div className="space-y-2">
-          {services.map(s => (
-            <div key={s._id} className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl">
-              {s.image ? (
-                <img src={s.image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
-              ) : (
-                <div className="w-12 h-12 bg-brand-light rounded-lg flex items-center justify-center shrink-0">
-                  <span className="text-brand font-bold">π</span>
+        <div className="text-center text-gray-400 py-12">
+          <Package size={40} className="mx-auto mb-3 opacity-30" />
+          <p>Modération des services — bientôt disponible</p>
+        </div>
+      )}
+
+      {/* ── MODAL DE CONTACT ── */}
+      {contact.open && contact.user && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeContact} />
+          {/* Panel */}
+          <div className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 space-y-4 mx-0 sm:mx-4">
+            {/* Header modal */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {contact.user.avatar
+                  ? <img src={contact.user.avatar} className="w-10 h-10 rounded-full object-cover" alt="" />
+                  : <span className="w-10 h-10 rounded-full bg-brand/10 text-brand font-bold flex items-center justify-center text-lg">
+                      {(contact.user.displayName || contact.user.username || 'π').charAt(0).toUpperCase()}
+                    </span>}
+                <div>
+                  <p className="font-semibold text-navy">@{contact.user.username || contact.user.pi_username}</p>
+                  <p className="text-xs text-gray-400">Message privé</p>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-navy text-sm truncate">{s.title}</p>
-                <p className="text-xs text-gray-400 truncate">
-                  {t('admin.by')} @{s.ownerUsername || '—'} · π {s.price} · {s.category || '—'}
-                </p>
               </div>
-              <button
-                onClick={() => handleDeleteService(s._id)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-medium transition-colors"
-              >
-                <Trash2 size={13} />
-                {t('admin.delete')}
+              <button onClick={closeContact} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+                <X size={18} className="text-gray-400" />
               </button>
             </div>
-          ))}
-          {!loading && services.length === 0 && <p className="text-gray-400 text-sm">{t('admin.empty')}</p>}
-        </div>
-      )}
 
-      {/* ════════ ONGLET COMMANDES ════════ */}
-      {tab === 'orders' && (
-        <div className="space-y-2">
-          {orders.map(o => (
-            <div key={o._id} className="p-3 bg-white border border-gray-200 rounded-xl">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <p className="font-medium text-navy text-sm truncate">{o.serviceTitle || o._id}</p>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${STATUS_COLORS[o.status] || 'bg-gray-100 text-gray-600'}`}>
-                  {o.status}
-                </span>
+            {/* Textarea */}
+            {contact.sent ? (
+              <div className="flex flex-col items-center py-6 space-y-2">
+                <CheckCircle size={40} className="text-green-500" />
+                <p className="font-medium text-navy">Message envoyé ✅</p>
+                <p className="text-xs text-gray-400">Il apparaîtra dans sa messagerie WorkπServ</p>
               </div>
-              <p className="text-xs text-gray-400">
-                {t('admin.buyer')} @{o.buyerUsername || '—'} → {t('admin.seller')} @{o.sellerUsername || '—'}
-              </p>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-sm font-semibold text-brand">π {o.amount?.toFixed?.(2) ?? o.amount}</span>
-                <span className="text-xs text-gray-400">{formatDate(o.createdAt)}</span>
-              </div>
-            </div>
-          ))}
-          {!loading && orders.length === 0 && <p className="text-gray-400 text-sm">{t('admin.empty')}</p>}
+            ) : (
+              <>
+                <textarea
+                  className="w-full border border-gray-200 rounded-2xl p-3 text-sm resize-none focus:outline-none focus:border-brand h-32 transition-colors"
+                  placeholder="Écrivez votre message ici... (il recevra une notification dans ses Messages)"
+                  value={contact.message}
+                  onChange={e => setContact(c => ({ ...c, message: e.target.value }))}
+                />
+                {contact.error && <p className="text-xs text-red-500">{contact.error}</p>}
+                <div className="flex gap-3">
+                  <button onClick={closeContact} className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Annuler
+                  </button>
+                  <button onClick={sendMessage} disabled={contact.sending || !contact.message.trim()}
+                    className="flex-1 py-3 rounded-2xl bg-brand text-white text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-brand/90 transition-colors">
+                    {contact.sending ? <RefreshCw size={15} className="animate-spin" /> : <Send size={15} />}
+                    {contact.sending ? 'Envoi...' : 'Envoyer'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
-
-      {loading && (
-        <div className="flex justify-center py-8">
-          <RefreshCw size={22} className="text-brand animate-spin" />
-        </div>
-      )}
-    </main>
-  );
-}
-
-function StatCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className={`p-4 rounded-xl border ${highlight ? 'bg-brand-light border-brand/20' : 'bg-white border-gray-200'}`}>
-      <p className={`text-2xl font-bold ${highlight ? 'text-brand' : 'text-navy'}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
     </div>
   );
 }
