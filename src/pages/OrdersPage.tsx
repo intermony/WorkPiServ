@@ -22,7 +22,7 @@ const statusConfig: Record<OrderStatus, { labelKey: string; color: string; bg: s
 // Tolère les anciens statuts inconnus (ex. "pending" des premières versions)
 function getStatusConfig(status: string) {
   return statusConfig[status as OrderStatus]
-    ?? { labelKey: status, color: 'text-gray-600', bg: 'bg-gray-100' };
+    ?? { labelKey: status, color: 'text-muted-foreground', bg: 'bg-muted' };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,7 +122,7 @@ export default function OrdersPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">{t('orders.loading')}</p>
+          <p className="text-muted-foreground text-sm">{t('orders.loading')}</p>
         </div>
       </main>
     );
@@ -133,8 +133,8 @@ export default function OrdersPage() {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center px-6">
           <Package size={48} className="text-gray-300 mx-auto mb-4" />
-          <h2 className="font-semibold text-gray-700 mb-2">{t('orders.loadError')}</h2>
-          <p className="text-sm text-gray-500 mb-4">{t('orders.checkConnection')}</p>
+          <h2 className="font-semibold text-foreground mb-2">{t('orders.loadError')}</h2>
+          <p className="text-sm text-muted-foreground mb-4">{t('orders.checkConnection')}</p>
           <Link to="/" className="btn-primary">{t('orders.backHome')}</Link>
         </div>
       </main>
@@ -144,12 +144,12 @@ export default function OrdersPage() {
   return (
     <main className="min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="section-container py-8">
-          <div className="text-sm text-gray-500 mb-2">
+          <div className="text-sm text-muted-foreground mb-2">
             <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-700">{t('orders.title')}</span>
+            <span className="text-foreground">{t('orders.title')}</span>
           </div>
           <h1 className="font-heading font-bold text-3xl text-navy">{t('orders.title')}</h1>
 
@@ -167,7 +167,7 @@ export default function OrdersPage() {
                   key={key}
                   onClick={() => { setActiveStatus(key); setSelectedId(null); }}
                   className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeStatus === key ? 'bg-brand-light text-brand' : 'text-gray-500 hover:bg-gray-50'
+                    activeStatus === key ? 'bg-brand-light text-brand' : 'text-muted-foreground hover:bg-background'
                   }`}
                 >
                   {t(labels[key])} <span className="opacity-60 text-xs">({count})</span>
@@ -183,8 +183,8 @@ export default function OrdersPage() {
         {filtered.length === 0 ? (
           <div className="text-center py-20">
             <Package size={48} className="text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700">{t('orders.none')}</h3>
-            <p className="text-sm text-gray-500 mt-1 mb-4">{t('orders.noneHint')}</p>
+            <h3 className="text-lg font-semibold text-foreground">{t('orders.none')}</h3>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">{t('orders.noneHint')}</p>
             <Link to="/marketplace" className="btn-primary">{t('orders.browse')}</Link>
           </div>
         ) : (
@@ -205,12 +205,12 @@ export default function OrdersPage() {
                       <img
                         src={order.serviceImage}
                         alt={order.serviceTitle}
-                        className="w-20 h-14 rounded-lg object-cover shrink-0 bg-gray-100"
+                        className="w-20 h-14 rounded-lg object-cover shrink-0 bg-muted"
                         onError={(e) => { (e.target as HTMLImageElement).src = '/images/service-default.jpg'; }}
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-navy text-sm line-clamp-1">{order.serviceTitle}</h3>
-                        <p className="text-xs text-gray-500 mt-1">{order.freelancer.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{order.freelancer.name}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>
                             {t(sc.labelKey)}
@@ -232,13 +232,13 @@ export default function OrdersPage() {
                     <img
                       src={activeOrder.serviceImage}
                       alt={activeOrder.serviceTitle}
-                      className="w-24 h-16 rounded-lg object-cover shrink-0 bg-gray-100"
+                      className="w-24 h-16 rounded-lg object-cover shrink-0 bg-muted"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/images/service-default.jpg'; }}
                     />
                     <div className="flex-1">
                       <h2 className="font-semibold text-navy">{activeOrder.serviceTitle}</h2>
-                      <p className="text-sm text-gray-600 mt-1">{activeOrder.freelancer.name}</p>
-                      <div className="flex flex-wrap gap-2 mt-2 text-xs text-gray-500">
+                      <p className="text-sm text-muted-foreground mt-1">{activeOrder.freelancer.name}</p>
+                      <div className="flex flex-wrap gap-2 mt-2 text-xs text-muted-foreground">
                         <span>{activeOrder.orderId}</span>
                         <span>{activeOrder.date}</span>
                         <span className="bg-brand-light text-brand px-2 py-0.5 rounded-full">{activeOrder.package}</span>
@@ -251,7 +251,7 @@ export default function OrdersPage() {
                     <Shield size={22} className="text-purple-600 shrink-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-purple-700 text-sm">{t('orders.escrowTitle')}</p>
-                      <p className="text-xs text-gray-500">{t('orders.escrowBody').replace('{n}', String(activeOrder.price))}</p>
+                      <p className="text-xs text-muted-foreground">{t('orders.escrowBody').replace('{n}', String(activeOrder.price))}</p>
                     </div>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusConfig(activeOrder.status).bg} ${getStatusConfig(activeOrder.status).color}`}>
                       {t(getStatusConfig(activeOrder.status).labelKey)}
@@ -281,7 +281,7 @@ export default function OrdersPage() {
                         {acting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                         {t('orders.confirmRelease').replace('{n}', String(activeOrder.price))}
                       </button>
-                      <p className="text-xs text-gray-500 text-center mt-2">
+                      <p className="text-xs text-muted-foreground text-center mt-2">
                         {t('orders.confirmHint')}
                       </p>
                     </div>
@@ -302,7 +302,7 @@ export default function OrdersPage() {
                 <div className="card-surface p-6">
                   <h3 className="font-semibold text-navy mb-3">{t('orders.deliverables')}</h3>
                   {(activeOrder.deliverables ?? []).length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-6">
+                    <p className="text-sm text-muted-foreground text-center py-6">
                       {activeOrder.status === 'in_progress'
                         ? t('orders.workInProgress')
                         : t('orders.noDeliverables')}
@@ -310,11 +310,11 @@ export default function OrdersPage() {
                   ) : (
                     <div className="space-y-2">
                       {(activeOrder.deliverables ?? []).map((file, i) => (
-                        <div key={i} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
+                        <div key={i} className="flex items-center gap-3 p-3 border border-border rounded-lg">
                           <Package size={18} className="text-brand shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-navy truncate">{file.name}</p>
-                            <p className="text-xs text-gray-500">{file.size}</p>
+                            <p className="text-xs text-muted-foreground">{file.size}</p>
                           </div>
                         </div>
                       ))}
