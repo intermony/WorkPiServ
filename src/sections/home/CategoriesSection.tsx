@@ -44,7 +44,7 @@ export function CategoriesSection() {
                   <h3 className="font-semibold text-navy group-hover:text-brand transition-colors">
                     {cat.name}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">{cat.count} {t('home.servicesWord')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{cat.count} {t('home.servicesWord')}</p>
                 </Link>
               </ScrollReveal>
             );
