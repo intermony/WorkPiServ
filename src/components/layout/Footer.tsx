@@ -1,10 +1,6 @@
 import { Shield, Globe, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
-
-// Use navigate function instead of Link for Pi Browser compatibility
-const navigate = (href: string) => {
-  window.location.href = href;
-};
 
 const platformLinks = [
   { label: 'market.title', href: '/marketplace' },
@@ -29,6 +25,7 @@ const communityLinks = [
 
 export function Footer() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   return (
     <footer className="bg-[#100D26] text-white">
       <div className="section-container py-16 pb-8">
