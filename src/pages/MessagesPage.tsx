@@ -131,21 +131,21 @@ export default function MessagesPage() {
   const showChat = !!activeConv;
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-gray-50 max-w-4xl mx-auto border-x border-gray-100 overflow-hidden">
-      <div className={`flex flex-col w-full md:w-80 shrink-0 bg-white border-r border-gray-200 ${showChat ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-800 text-lg">{t('nav.messages')}</h2>
+    <div className="flex h-[calc(100vh-8rem)] bg-background max-w-4xl mx-auto border-x border-border overflow-hidden">
+      <div className={`flex flex-col w-full md:w-80 shrink-0 bg-card border-r border-border ${showChat ? 'hidden md:flex' : 'flex'}`}>
+        <div className="p-4 border-b border-border">
+          <h2 className="font-semibold text-foreground text-lg">{t('nav.messages')}</h2>
         </div>
         <div className="flex-1 overflow-y-auto">
           {loadingConvs ? (
-            <div className="flex items-center justify-center h-32 gap-2 text-gray-400">
+            <div className="flex items-center justify-center h-32 gap-2 text-muted-foreground">
               <Loader2 size={18} className="animate-spin" />
               <span className="text-sm">{t('common.loading')}</span>
             </div>
           ) : conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-16 text-gray-400 gap-2 px-6 text-center">
+            <div className="flex flex-col items-center justify-center h-full py-16 text-muted-foreground gap-2 px-6 text-center">
               <MessageSquare size={40} className="text-gray-300" />
-              <p className="font-medium text-gray-600">{t('messages.none')}</p>
+              <p className="font-medium text-muted-foreground">{t('messages.none')}</p>
               <p className="text-xs">{t('messages.noneHint')}</p>
             </div>
           ) : (
@@ -153,7 +153,7 @@ export default function MessagesPage() {
               <button
                 key={conv._id}
                 onClick={() => setActiveConv(conv)}
-                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 ${activeConv?._id === conv._id ? 'bg-orange-50' : ''}`}
+                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-background transition-colors text-left border-b border-border ${activeConv?._id === conv._id ? 'bg-brand-light' : ''}`}
               >
                 <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0 text-sm font-bold">
                   {conv.participantAvatar
@@ -163,13 +163,13 @@ export default function MessagesPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800 text-sm truncate">{conv.participantName}</span>
-                    <span className="text-xs text-gray-400 shrink-0 ml-1">{formatDate(conv.lastMessageAt)}</span>
+                    <span className="font-medium text-foreground text-sm truncate">{conv.participantName}</span>
+                    <span className="text-xs text-muted-foreground shrink-0 ml-1">{formatDate(conv.lastMessageAt)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">{conv.lastMessage}</p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
                 </div>
                 {conv.unread > 0 && (
-                  <span className="w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 bg-brand-light0 text-white text-xs rounded-full flex items-center justify-center shrink-0">
                     {conv.unread}
                   </span>
                 )}
@@ -181,14 +181,14 @@ export default function MessagesPage() {
 
       <div className={`flex flex-col flex-1 ${showChat ? 'flex' : 'hidden md:flex'}`}>
         {!activeConv ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
             <MessageSquare size={48} className="text-gray-300" />
             <p className="text-sm">{t('messages.select')}</p>
           </div>
         ) : (
           <>
-            <div className="p-4 bg-white border-b border-gray-200 flex items-center gap-3 sticky top-0 z-10">
-              <button onClick={() => { setActiveConv(null); navigate('/messages'); }} className="md:hidden p-1 text-gray-500">
+            <div className="p-4 bg-card border-b border-border flex items-center gap-3 sticky top-0 z-10">
+              <button onClick={() => { setActiveConv(null); navigate('/messages'); }} className="md:hidden p-1 text-muted-foreground">
                 <ArrowLeft size={20} />
               </button>
               <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold shrink-0">
@@ -197,16 +197,16 @@ export default function MessagesPage() {
                   : <User size={18} />
                 }
               </div>
-              <h2 className="font-semibold text-gray-800 text-sm">{activeConv.participantName}</h2>
+              <h2 className="font-semibold text-foreground text-sm">{activeConv.participantName}</h2>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {loadingMsgs ? (
-                <div className="flex items-center justify-center h-full gap-2 text-gray-400">
+                <div className="flex items-center justify-center h-full gap-2 text-muted-foreground">
                   <Loader2 size={18} className="animate-spin" />
                 </div>
               ) : messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
                   <p className="text-sm">{t('messages.start')}</p>
                 </div>
               ) : (
@@ -215,10 +215,10 @@ export default function MessagesPage() {
                   return (
                     <div key={msg._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
-                        isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm'
+                        isMine ? 'bg-brand-light0 text-white rounded-br-sm' : 'bg-card border border-border text-foreground rounded-bl-sm'
                       }`}>
                         <p>{msg.text}</p>
-                        <p className={`text-[10px] mt-1 ${isMine ? 'text-orange-200' : 'text-gray-400'}`}>
+                        <p className={`text-[10px] mt-1 ${isMine ? 'text-orange-200' : 'text-muted-foreground'}`}>
                           {formatTime(msg.created_at)}
                         </p>
                       </div>
@@ -229,19 +229,19 @@ export default function MessagesPage() {
               <div ref={bottomRef} />
             </div>
 
-            <form onSubmit={handleSend} className="p-4 bg-white border-t border-gray-200 flex gap-2">
+            <form onSubmit={handleSend} className="p-4 bg-card border-t border-border flex gap-2">
               <input
                 type="text"
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
                 placeholder={t('messages.writePh')}
-                className="flex-1 px-4 py-2 bg-gray-100 border border-transparent rounded-full text-sm focus:outline-none focus:bg-white focus:border-orange-500 transition-all"
+                className="flex-1 px-4 py-2 bg-muted border border-transparent rounded-full text-sm focus:outline-none focus:bg-card focus:border-orange-500 transition-all"
                 disabled={sending}
               />
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2.5 bg-brand-light0 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
