@@ -9,10 +9,10 @@ export default function BlogPage() {
       <h1 className="font-heading font-bold text-3xl text-navy mb-8">Blog</h1>
       <div className="space-y-6">
         {posts.map((post, i) => (
-          <div key={i} className="border border-gray-200 rounded-xl p-6 hover:border-brand transition-colors">
-            <span className="text-xs text-gray-400 uppercase tracking-wider">{post.date}</span>
+          <div key={i} className="border border-border rounded-xl p-6 hover:border-brand transition-colors">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">{post.date}</span>
             <h2 className="font-heading font-bold text-xl text-navy mt-1 mb-2">{post.title}</h2>
-            <p className="text-gray-600 text-sm">{post.excerpt}</p>
+            <p className="text-muted-foreground text-sm">{post.excerpt}</p>
           </div>
         ))}
       </div>
