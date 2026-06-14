@@ -157,23 +157,23 @@ export default function MarketplacePage() {
           <button
             onClick={() => updateParam('category', '')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-              !activeCategory ? 'bg-brand-light text-brand font-medium' : 'text-gray-600 hover:bg-gray-50'
+              !activeCategory ? 'bg-brand-light text-brand font-medium' : 'text-muted-foreground hover:bg-background'
             }`}
           >
             <LayoutGrid size={18} />
             All Services
-            <span className="ml-auto text-xs text-gray-400">{allServices.length}</span>
+            <span className="ml-auto text-xs text-muted-foreground">{allServices.length}</span>
           </button>
           {categories.map(cat => (
             <button
               key={cat.id}
               onClick={() => updateParam('category', cat.id)}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors capitalize ${
-                activeCategory === cat.id ? 'bg-brand-light text-brand font-medium' : 'text-gray-600 hover:bg-gray-50'
+                activeCategory === cat.id ? 'bg-brand-light text-brand font-medium' : 'text-muted-foreground hover:bg-background'
               }`}
             >
               <span className="capitalize">{cat.name}</span>
-              <span className="ml-auto text-xs text-gray-400">
+              <span className="ml-auto text-xs text-muted-foreground">
                 {categoryCounts[cat.id] || 0}
               </span>
             </button>
@@ -190,9 +190,9 @@ export default function MarketplacePage() {
                 type="radio" name="delivery" value={opt.value}
                 checked={activeDelivery === opt.value}
                 onChange={(e) => updateParam('delivery', e.target.value)}
-                className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
+                className="w-4 h-4 text-brand border-border focus:ring-brand"
               />
-              <span className="text-sm text-gray-600">{t(opt.label)}</span>
+              <span className="text-sm text-muted-foreground">{t(opt.label)}</span>
             </label>
           ))}
         </div>
@@ -207,9 +207,9 @@ export default function MarketplacePage() {
                 type="radio" name="rating" value={opt.value}
                 checked={activeRating === opt.value}
                 onChange={(e) => updateParam('rating', e.target.value)}
-                className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
+                className="w-4 h-4 text-brand border-border focus:ring-brand"
               />
-              <span className="text-sm text-gray-600">{t(opt.label)}</span>
+              <span className="text-sm text-muted-foreground">{t(opt.label)}</span>
             </label>
           ))}
         </div>
@@ -225,10 +225,10 @@ export default function MarketplacePage() {
 
   return (
     <main className="min-h-screen pb-20">
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="section-container py-8">
           <ScrollReveal>
-            <div className="text-sm text-gray-500 mb-2">
+            <div className="text-sm text-muted-foreground mb-2">
               <Link to="/" className="text-brand hover:underline">{t('nav.home')}</Link>
               <span className="mx-2">/</span>
               <span>{t('nav.marketplace')}</span>
@@ -240,13 +240,13 @@ export default function MarketplacePage() {
             <div className="mt-6 max-w-2xl">
               <div className="flex">
                 <div className="flex-1 relative">
-                  <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder={t('header.search')}
                     value={searchQuery}
                     onChange={(e) => updateParam('q', e.target.value)}
-                    className="w-full h-[52px] pl-12 pr-4 border border-gray-200 rounded-l-full text-base focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
+                    className="w-full h-[52px] pl-12 pr-4 border border-border rounded-l-full text-base focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
                   />
                 </div>
                 <button className="btn-primary rounded-l-none rounded-r-full h-[52px] px-7">{t('market.search')}</button>
@@ -259,7 +259,7 @@ export default function MarketplacePage() {
               <button
                 onClick={() => updateParam('category', '')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  !activeCategory ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  !activeCategory ? 'bg-brand text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                 }`}
               >
                 {t('market.all')}
@@ -269,7 +269,7 @@ export default function MarketplacePage() {
                   key={cat.id}
                   onClick={() => updateParam('category', activeCategory === cat.id ? '' : cat.id)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${
-                    activeCategory === cat.id ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    activeCategory === cat.id ? 'bg-brand text-white' : 'bg-muted text-muted-foreground hover:bg-muted'
                   }`}
                 >
                   {cat.name}
@@ -301,7 +301,7 @@ export default function MarketplacePage() {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {loading
                   ? t('market.loadingServices')
                   : t('market.showing').replace('{n}', String(filteredServices.length)).replace('{m}', String(allServices.length))}
@@ -317,7 +317,7 @@ export default function MarketplacePage() {
                 )}
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-navy transition-colors bg-white border border-gray-200 rounded-lg px-4 py-2"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-navy transition-colors bg-card border border-border rounded-lg px-4 py-2"
                 >
                   {t(sortOptions.find(o => o.value === activeSort)?.label || '')}
                   <ChevronDown size={16} />
@@ -326,14 +326,14 @@ export default function MarketplacePage() {
                   {sortOpen && (
                     <motion.div
                       initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                      className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-20 min-w-[180px]"
+                      className="absolute right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-lg py-2 z-20 min-w-[180px]"
                     >
                       {sortOptions.map(opt => (
                         <button
                           key={opt.value}
                           onClick={() => { updateParam('sort', opt.value); setSortOpen(false); }}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                            activeSort === opt.value ? 'text-brand font-medium' : 'text-gray-600'
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-background transition-colors ${
+                            activeSort === opt.value ? 'text-brand font-medium' : 'text-muted-foreground'
                           }`}
                         >
                           {t(opt.label)}
@@ -349,7 +349,7 @@ export default function MarketplacePage() {
               <div className="flex items-center justify-center min-h-[300px]">
                 <div className="text-center">
                   <Loader2 size={36} className="text-brand animate-spin mx-auto mb-3" />
-                  <p className="text-gray-500 text-sm">{t('market.loadingServices')}</p>
+                  <p className="text-muted-foreground text-sm">{t('market.loadingServices')}</p>
                 </div>
               </div>
             ) : filteredServices.length > 0 ? (
@@ -361,10 +361,10 @@ export default function MarketplacePage() {
             ) : (
               <div className="text-center py-20">
                 <Search size={48} className="text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-700">
+                <h3 className="text-lg font-semibold text-foreground">
                   {hasFilters ? t('market.noMatch') : t('market.noServices')}
                 </h3>
-                <p className="text-gray-500 mt-2">
+                <p className="text-muted-foreground mt-2">
                   {hasFilters
                     ? t('market.tryAdjust')
                     : t('market.beFirst')}
@@ -389,12 +389,12 @@ export default function MarketplacePage() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: '20%' }} exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl p-6 overflow-y-auto"
+              className="fixed inset-x-0 bottom-0 z-50 bg-card rounded-t-3xl p-6 overflow-y-auto"
               style={{ maxHeight: '80vh' }}
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-semibold text-navy text-lg">{t('market.filters')}</h3>
-                <button onClick={() => setMobileFilterOpen(false)} className="p-2 rounded-lg hover:bg-gray-100">
+                <button onClick={() => setMobileFilterOpen(false)} className="p-2 rounded-lg hover:bg-muted">
                   <X size={20} />
                 </button>
               </div>
