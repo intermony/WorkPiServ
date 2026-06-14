@@ -30,7 +30,7 @@ const communityLinks = [
 export function Footer() {
   const { t } = useLanguage();
   return (
-    <footer className="bg-navy text-white">
+    <footer className="bg-[#100D26] text-white">
       <div className="section-container py-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
@@ -43,13 +43,13 @@ export function Footer() {
                 Work<span className="text-brand">π</span>Serv
               </span>
             </button>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {t('footer.tagline')}
             </p>
             <div className="flex items-center gap-4 mt-4">
-              <Shield size={16} className="text-gray-400" />
-              <Globe size={16} className="text-gray-400" />
-              <Zap size={16} className="text-gray-400" />
+              <Shield size={16} className="text-muted-foreground" />
+              <Globe size={16} className="text-muted-foreground" />
+              <Zap size={16} className="text-muted-foreground" />
             </div>
           </div>
 
@@ -59,7 +59,7 @@ export function Footer() {
             <ul className="space-y-3">
               {platformLinks.map((link) => (
                 <li key={link.label}>
-                  <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
+                  <button onClick={() => navigate(link.href)} className="text-sm text-muted-foreground hover:text-white transition-colors text-left">
                     {t(link.label)}
                   </button>
                 </li>
@@ -73,7 +73,7 @@ export function Footer() {
             <ul className="space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.label}>
-                  <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
+                  <button onClick={() => navigate(link.href)} className="text-sm text-muted-foreground hover:text-white transition-colors text-left">
                     {t(link.label)}
                   </button>
                 </li>
@@ -87,7 +87,7 @@ export function Footer() {
             <ul className="space-y-3">
               {communityLinks.map((link) => (
                 <li key={link.label}>
-                  <button onClick={() => navigate(link.href)} className="text-sm text-gray-400 hover:text-white transition-colors text-left">
+                  <button onClick={() => navigate(link.href)} className="text-sm text-muted-foreground hover:text-white transition-colors text-left">
                     {t(link.label)}
                   </button>
                 </li>
@@ -98,13 +98,13 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             &copy; 2026 WorkπServ. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/privacy')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.privacy')}</button>
-            <button onClick={() => navigate('/terms')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.terms')}</button>
-            <button onClick={() => navigate('/cookies')} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">{t('footer.cookies')}</button>
+            <button onClick={() => navigate('/privacy')} className="text-xs text-muted-foreground hover:text-gray-300 transition-colors">{t('footer.privacy')}</button>
+            <button onClick={() => navigate('/terms')} className="text-xs text-muted-foreground hover:text-gray-300 transition-colors">{t('footer.terms')}</button>
+            <button onClick={() => navigate('/cookies')} className="text-xs text-muted-foreground hover:text-gray-300 transition-colors">{t('footer.cookies')}</button>
           </div>
         </div>
       </div>
