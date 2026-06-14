@@ -15,7 +15,7 @@ export function MobileBottomNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.04)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border shadow-[0_-2px_8px_rgba(0,0,0,0.04)] md:hidden">
       <div className="flex items-center justify-around h-16 pb-safe">
         {navItems.map((item) => {
           const isActive = item.href === '/'
@@ -26,7 +26,7 @@ export function MobileBottomNav() {
               key={item.key}
               to={item.href}
               className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors ${
-                isActive ? 'text-orange-600' : 'text-gray-400'
+                isActive ? 'text-orange-600' : 'text-muted-foreground'
               }`}
             >
               <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
