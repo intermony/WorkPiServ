@@ -11,14 +11,14 @@ export default function HelpPage() {
       <h1 className="font-heading font-bold text-3xl text-navy mb-8">Help Center</h1>
       <div className="space-y-6">
         {faqs.map((faq, i) => (
-          <div key={i} className="border border-gray-200 rounded-xl p-6">
+          <div key={i} className="border border-border rounded-xl p-6">
             <h3 className="font-semibold text-navy mb-2">{faq.q}</h3>
-            <p className="text-gray-600 text-sm">{faq.a}</p>
+            <p className="text-muted-foreground text-sm">{faq.a}</p>
           </div>
         ))}
       </div>
       <div className="mt-8 p-6 bg-brand-light rounded-xl text-center">
-        <p className="text-gray-600 mb-2">Still need help?</p>
+        <p className="text-muted-foreground mb-2">Still need help?</p>
         <a href="mailto:support@workpiserv.com" className="btn-primary inline-block">Contact Support</a>
       </div>
     </div>
