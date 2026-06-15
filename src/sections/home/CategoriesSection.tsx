@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Palette, Code, Megaphone, Pen, Clapperboard, Mic } from 'lucide-react';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { categories } from '@/data/categories';
 import { useLanguage } from '@/i18n';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
 const iconMap: Record<string, React.ElementType> = {
   Palette, Code, Megaphone, Pen, Clapperboard, Mic,
@@ -10,6 +13,28 @@ const iconMap: Record<string, React.ElementType> = {
 
 export function CategoriesSection() {
   const { t } = useLanguage();
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/services`);
+        if (res.ok) {
+          const data = await res.json();
+          const raw = (Array.isArray(data) ? data : data.services || []) as Array<{ category?: string }>;
+          // Même logique de comptage que MarketplacePage : clé = valeur exacte de category
+          const c: Record<string, number> = {};
+          for (const s of raw) {
+            if (s && s.category) c[s.category] = (c[s.category] || 0) + 1;
+          }
+          if (active) setCounts(c);
+        }
+      } catch { /* silencieux */ }
+    })();
+    return () => { active = false; };
+  }, []);
+
   return (
     <section className="py-16 lg:py-24">
       <div className="section-container">
@@ -44,7 +69,7 @@ export function CategoriesSection() {
                   <h3 className="font-semibold text-navy group-hover:text-brand transition-colors">
                     {cat.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1">{cat.count} {t('home.servicesWord')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{counts[cat.id] || 0} {t('home.servicesWord')}</p>
                 </Link>
               </ScrollReveal>
             );
