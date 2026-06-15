@@ -4,7 +4,7 @@ import { useLanguage } from '@/i18n';
 
 const platformLinks = [
   { label: 'market.title', href: '/marketplace' },
-  { label: 'home.howTitle', href: '/' },
+  { label: 'home.howTitle', href: '/help' },
   { label: 'footer.escrowSystem', href: '/safety' },
   { label: 'footer.pricing', href: '/help' },
 ];
@@ -19,7 +19,7 @@ const supportLinks = [
 const communityLinks = [
   { label: 'footer.aboutUs', href: '/about' },
   { label: 'footer.blog', href: '/blog' },
-  { label: 'footer.becomeFreelancer', href: '/marketplace' },
+  { label: 'footer.becomeFreelancer', href: '/create-service' },
   { label: 'footer.affiliate', href: '/affiliate' },
 ];
 
