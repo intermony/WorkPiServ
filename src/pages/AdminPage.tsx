@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, RefreshCw, BarChart2, Users, Package, X, Send, MessageCircle, Ban, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Shield, RefreshCw, BarChart2, Users, Package, X, Send, MessageCircle, Ban, CheckCircle, Eye, EyeOff, ArrowDownToLine } from 'lucide-react';
 import { usePiAuth } from '@/hooks/usePiAuth';
 
 const API = import.meta.env.VITE_API_URL || 'https://workpiserv-api.onrender.com';
@@ -45,14 +45,27 @@ interface ContactModal {
   error: string;
 }
 
+interface WithdrawalRow {
+  _id: string;
+  amount: number;
+  status: 'requested' | 'processing' | 'submitted' | 'completed' | 'failed' | 'blocked';
+  username?: string;
+  recipientUid?: string;
+  availableAt?: string;
+  txid?: string;
+  error?: string;
+  createdAt?: string;
+}
+
 export default function AdminPage() {
   const { user, loggedIn } = usePiAuth();
   const navigate = useNavigate();
 
-  const [tab, setTab] = useState<'stats' | 'users' | 'services'>('stats');
+  const [tab, setTab] = useState<'stats' | 'users' | 'services' | 'withdrawals'>('stats');
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [services, setServices] = useState<ServiceRow[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [banConfirm, setBanConfirm] = useState<string | null>(null);
 
@@ -95,9 +108,44 @@ export default function AdminPage() {
     setLoading(false);
   }, []);
 
+  const fetchWithdrawals = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`${API}/api/admin/withdrawals`, { headers: { Authorization: `Bearer ${token()}` } });
+      if (!r.ok) throw new Error();
+      setWithdrawals(await r.json());
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
+
+  // Veto : bloque un retrait pendant la fenêtre de 48h (le backend rembourse le solde).
+  const blockWithdrawal = async (id: string) => {
+    try {
+      const r = await fetch(`${API}/api/admin/withdrawals/${id}/block`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({ reason: 'Bloqué par admin' }),
+      });
+      if (!r.ok) throw new Error();
+      setWithdrawals(w => w.map(x => x._id === id ? { ...x, status: 'blocked' } : x));
+    } catch { /* silent */ }
+  };
+
+  // Payer maintenant : déclenche le payout sans attendre la fin de la fenêtre de veto.
+  const releaseWithdrawal = async (id: string) => {
+    try {
+      const r = await fetch(`${API}/api/admin/withdrawals/${id}/release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
+      });
+      if (!r.ok) throw new Error();
+      setWithdrawals(w => w.map(x => x._id === id ? { ...x, status: 'processing' } : x));
+    } catch { /* silent */ }
+  };
+
   useEffect(() => { if (loggedIn && isAdmin) { fetchStats(); fetchUsers(); fetchServices(); } }, [loggedIn, isAdmin]);
 
-  const refresh = () => { fetchStats(); if (tab === 'users') fetchUsers(); if (tab === 'services') fetchServices(); };
+  const refresh = () => { fetchStats(); if (tab === 'users') fetchUsers(); if (tab === 'services') fetchServices(); if (tab === 'withdrawals') fetchWithdrawals(); };
 
   const banUser = async (userId: string, currentlyBanned: boolean) => {
     try {
@@ -179,8 +227,8 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div className="flex items-center gap-2 bg-muted p-1 rounded-2xl">
-        {([['stats','Statistiques',BarChart2],['users','Utilisateurs',Users],['services','Services',Package]] as const).map(([key,label,Icon]) => (
-          <button key={key} onClick={() => { setTab(key); if (key === 'users') fetchUsers(); if (key === 'services') fetchServices(); }}
+        {([['stats','Statistiques',BarChart2],['users','Utilisateurs',Users],['services','Services',Package],['withdrawals','Retraits',ArrowDownToLine]] as const).map(([key,label,Icon]) => (
+          <button key={key} onClick={() => { setTab(key); if (key === 'users') fetchUsers(); if (key === 'services') fetchServices(); if (key === 'withdrawals') fetchWithdrawals(); }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-medium transition-all ${tab === key ? 'bg-brand text-white shadow' : 'text-muted-foreground hover:bg-white'}`}>
             <Icon size={15} />{label}
           </button>
@@ -292,6 +340,48 @@ export default function AdminPage() {
                     {hidden ? <><Eye size={13} /> Réafficher</> : <><EyeOff size={13} /> Cacher</>}
                   </button>
                 </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {tab === 'withdrawals' && (
+        <div className="space-y-2">
+          {withdrawals.length === 0 && !loading && <p className="text-center text-muted-foreground py-8">Aucun retrait</p>}
+          {withdrawals.map(w => {
+            const inWindow = w.status === 'requested';
+            const STYLE: Record<string, string> = {
+              requested: 'text-[#FBBF24]', processing: 'text-[#60A5FA]', submitted: 'text-[#60A5FA]',
+              completed: 'text-[#4ADE80]', failed: 'text-[#F87171]', blocked: 'text-[#F87171]',
+            };
+            const LABEL: Record<string, string> = {
+              requested: 'En attente (48h)', processing: 'En cours', submitted: 'Sur la blockchain',
+              completed: 'Versé', failed: 'Échec (remboursé)', blocked: 'Bloqué (remboursé)',
+            };
+            return (
+              <div key={w._id} className={`bg-card rounded-2xl p-4 border ${inWindow ? 'border-[#FBBF24]/30' : 'border-border'}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-navy">{w.amount} π</span>
+                  <span className={`text-xs font-medium ${STYLE[w.status] || ''}`}>{LABEL[w.status] || w.status}</span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {w.username ? `@${w.username}` : '—'}
+                  {inWindow && w.availableAt ? ` · auto le ${new Date(w.availableAt).toLocaleString()}` : ''}
+                </p>
+                {w.txid && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">txid : {w.txid}</p>}
+                {inWindow && (
+                  <div className="flex gap-2 mt-3">
+                    <button onClick={() => blockWithdrawal(w._id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#F87171]/10 text-[#F87171] hover:bg-[#F87171]/20 transition-colors">
+                      <Ban size={13} /> Bloquer
+                    </button>
+                    <button onClick={() => releaseWithdrawal(w._id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#4ADE80]/10 text-[#4ADE80] hover:bg-[#4ADE80]/20 transition-colors">
+                      <CheckCircle size={13} /> Payer maintenant
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
