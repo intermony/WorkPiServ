@@ -84,7 +84,7 @@ class PiSDK {
     if (!window.Pi) return null;
 
     const auth = await window.Pi.authenticate(
-      ['username', 'payments'],
+      ['username', 'payments', 'wallet_address'],
       this.onIncompletePaymentFound.bind(this)
     ) as PiAuthResult;
 
