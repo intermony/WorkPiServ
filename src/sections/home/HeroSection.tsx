@@ -20,6 +20,7 @@ export function HeroSection() {
 
       <div className="section-container relative z-10 py-20 lg:py-32">
         <div className="max-w-xl">
+          {/* Badge masqué tant qu'on est en Testnet — réactiver au passage Mainnet
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -30,6 +31,7 @@ export function HeroSection() {
               {t('home.badge')}
             </span>
           </motion.div>
+          */}
 
           <motion.h1
             className="font-heading font-bold text-4xl lg:text-5xl text-navy leading-tight"
