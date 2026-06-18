@@ -142,6 +142,43 @@ class PiSDK {
     );
   }
 
+  // Recharge du solde interne (top-up U2A).
+  // Le backend reconnaît la recharge via metadata.type === 'wallet_topup'
+  // sur les routes /api/payments/approve et /api/payments/complete.
+  // Le crédit du solde est fait UNE SEULE FOIS côté serveur (atomique).
+  async topUpWallet(amount: number, callbacks: PaymentCallbacks) {
+    if (!this.initialized) await this.init();
+    if (!window.Pi) throw new Error('Pi SDK not initialized');
+    const token = localStorage.getItem('workpiserv_token');
+    return await (window.Pi as unknown as { createPayment: (data: unknown, cb: unknown) => Promise<unknown> }).createPayment(
+      {
+        amount,
+        memo     : 'WorkPiServ — Recharge du solde',
+        metadata : { type: 'wallet_topup' }
+      },
+      {
+        onReadyForServerApproval: async (paymentId: string) => {
+          const res = await fetch(`${API_URL}/api/payments/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ paymentId })
+          });
+          callbacks.onReadyForServerApproval?.(paymentId, await res.json());
+        },
+        onReadyForServerCompletion: async (paymentId: string, txid: string) => {
+          const res = await fetch(`${API_URL}/api/payments/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ paymentId, txid })
+          });
+          callbacks.onReadyForServerCompletion?.(paymentId, txid, await res.json());
+        },
+        onCancel : () => callbacks.onCancel?.(),
+        onError  : (error: unknown) => callbacks.onError?.(error)
+      }
+    );
+  }
+
   async onIncompletePaymentFound(payment: unknown) {
     try {
       const token = localStorage.getItem('workpiserv_token');
