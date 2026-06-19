@@ -9,6 +9,7 @@ interface PiUser {
   username: string;
   balance: number;
   type: string;
+  role?: string;
   unreadNotifications: number;
   unreadMessages: number;
   newOrders: number;
