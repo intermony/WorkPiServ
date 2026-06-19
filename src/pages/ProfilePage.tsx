@@ -435,7 +435,7 @@ export default function ProfilePage() {
         <WithdrawCard balance={user.balance ?? 0} />
 
         {/* Outil admin : test A2U (validation Mainnet) — visible admin uniquement */}
-        {user?.role === 'admin' && <AdminA2UCard currentUid={user.pi_uid} />}
+        {user.role === 'admin' && <AdminA2UCard />}
 
 
         {/* Wallet */}
