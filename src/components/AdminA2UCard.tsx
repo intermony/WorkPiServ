@@ -132,7 +132,6 @@ export default function AdminA2UCard({ currentUid }: { currentUid?: string }) {
           {rows.map((u) => {
             const st = states[u._id] || { phase: 'idle' as const };
             const isMe = currentUid && u.pi_uid === currentUid;
-            const alreadyPaid = u.pi_uid ? paid.has(u.pi_uid) : false;
             return (
               <div
                 key={u._id}
