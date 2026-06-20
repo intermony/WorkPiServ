@@ -14,6 +14,15 @@ import type { Service, Review } from '@/types';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
 
+// Mention transparente de la commission (affichée au moment de commander), multilingue.
+const COMMISSION_NOTE: Record<string, (net: string) => string> = {
+  en: (net) => `Platform commission 10% — the freelancer receives π ${net}`,
+  fr: (net) => `Commission plateforme 10% — le freelance reçoit π ${net}`,
+  ar: (net) => `عمولة المنصة 10% — يستلم المستقل π ${net}`,
+  zh: (net) => `平台佣金 10% — 自由职业者收到 π ${net}`,
+  vi: (net) => `Hoa hồng nền tảng 10% — freelancer nhận π ${net}`,
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeService(s: any): Service {
   const freelancerId = s.freelancerId || {};
@@ -66,7 +75,7 @@ export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, loggedIn, login } = usePiAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [service, setService]         = useState<Service | null>(null);
   const [reviews, setReviews]         = useState<Review[]>([]);
   const [loading, setLoading]         = useState(true);
@@ -365,6 +374,10 @@ export default function ServiceDetailPage() {
                   ) : (
                     <div className="text-3xl font-bold text-brand mb-4">π {service.price}</div>
                   )}
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-escrow bg-escrow-light rounded-full px-3 py-1.5">
+                    <ShieldCheck size={13} />
+                    <span>{(COMMISSION_NOTE[lang] || COMMISSION_NOTE.en)(((pkg?.price || service.price) * 0.9).toFixed(2))}</span>
+                  </div>
                   <button
                     onClick={handleBuy}
                     disabled={buying || isOwnService}
@@ -374,6 +387,12 @@ export default function ServiceDetailPage() {
                       ? <Loader2 size={20} className="animate-spin mx-auto" />
                       : `${t('service.continue')} (π ${pkg?.price || service.price})`}
                   </button>
+                  <p className="text-[11px] text-muted-foreground text-center mt-2 flex items-center justify-center gap-1">
+                    <ShieldCheck size={11} className="text-escrow" />
+                    {(COMMISSION_NOTE[lang] || COMMISSION_NOTE.en)(
+                      ((pkg?.price || service.price) * 0.9).toFixed(2)
+                    )}
+                  </p>
                   {isOwnService && (
                     <p className="text-xs text-muted-foreground text-center mt-2">{t('service.own')}</p>
                   )}
