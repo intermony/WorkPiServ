@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Send, Loader2, CheckCircle2, XCircle, Users, ShieldCheck } from 'lucide-react';
+import { Send, Loader2, CheckCircle2, XCircle, Users, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/i18n';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
@@ -28,6 +28,8 @@ const STR = {
     paidSession: 'Sent this session',
     refresh: 'Refresh list',
     noUid: 'No Pi uid',
+    show: 'Show',
+    hide: 'Hide',
   },
   fr: {
     title: 'Outil de validation A2U',
@@ -41,6 +43,8 @@ const STR = {
     paidSession: 'Envoyés cette session',
     refresh: 'Rafraîchir la liste',
     noUid: 'Pas de uid Pi',
+    show: 'Afficher',
+    hide: 'Masquer',
   },
 };
 
@@ -49,7 +53,8 @@ export default function AdminA2UCard({ currentUid }: { currentUid?: string }) {
   const s = (STR as Record<string, typeof STR.en>)[lang] || STR.en;
 
   const [rows, setRows] = useState<PioneerRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [states, setStates] = useState<Record<string, RowState>>({});
   const [paid, setPaid] = useState<Set<string>>(new Set());
 
@@ -72,7 +77,7 @@ export default function AdminA2UCard({ currentUid }: { currentUid?: string }) {
     }
   }, []);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => { if (open) fetchUsers(); }, [open, fetchUsers]);
 
   const send = async (u: PioneerRow) => {
     if (!u.pi_uid) return;
@@ -98,12 +103,21 @@ export default function AdminA2UCard({ currentUid }: { currentUid?: string }) {
 
   return (
     <section className="card-surface p-5 space-y-4">
-      <div>
+      <div className="flex items-center justify-between gap-3">
         <h2 className="font-heading font-semibold text-navy flex items-center gap-2">
           <ShieldCheck size={18} className="text-brand" /> {s.title}
         </h2>
-        <p className="text-xs text-muted-foreground mt-1">{s.sub}</p>
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="btn-primary text-xs px-3 py-2 whitespace-nowrap flex items-center gap-1.5"
+        >
+          {open ? (<><EyeOff size={14} /> {s.hide}</>) : (<><Eye size={14} /> {s.show}</>)}
+        </button>
       </div>
+
+      {open && (
+      <>
+      <p className="text-xs text-muted-foreground">{s.sub}</p>
 
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1.5 text-sm text-navy">
@@ -173,6 +187,8 @@ export default function AdminA2UCard({ currentUid }: { currentUid?: string }) {
             );
           })}
         </div>
+      )}
+      </>
       )}
     </section>
   );
