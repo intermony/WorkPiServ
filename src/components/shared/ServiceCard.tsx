@@ -56,7 +56,7 @@ export function ServiceCard({ service, index = 0 }: ServiceCardProps) {
               </div>
             )}
             {/* Category badge */}
-            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-medium px-2.5 py-1 rounded-full capitalize">
+            <div className="absolute top-3 left-3 bg-brand text-white backdrop-blur-sm text-xs font-medium px-2.5 py-1 rounded-full capitalize">
               {service.category}
             </div>
           </div>
