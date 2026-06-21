@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { piSDK, isPiBrowser, piSdkAvailable } from '@/lib/pi';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api-testnet.onrender.com';
 
 interface PiUser {
   _id: string;
