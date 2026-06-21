@@ -423,7 +423,7 @@ export default function AdminPage() {
             ) : (
               <>
                 <textarea
-                  className="w-full border border-border rounded-2xl p-3 text-sm resize-none focus:outline-none focus:border-brand h-32 transition-colors"
+                  className="w-full bg-background text-foreground placeholder:text-muted-foreground border border-border rounded-2xl p-3 text-sm resize-none focus:outline-none focus:border-brand h-32 transition-colors"
                   placeholder="Écrivez votre message ici... (il recevra une notification dans ses Messages)"
                   value={contact.message}
                   onChange={e => setContact(c => ({ ...c, message: e.target.value }))}
