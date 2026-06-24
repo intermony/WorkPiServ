@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Shield, Loader2, Truck, CheckCircle2 } from 'lucide-react';
 import { usePiAuth } from '@/hooks/usePiAuth';
+import Price from '@/components/shared/Price';
 import { useLanguage } from '@/i18n';
 import type { Order, OrderStatus } from '@/types';
 
@@ -132,7 +133,7 @@ export default function OrdersPage() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center px-6">
-          <Package size={48} className="text-gray-300 mx-auto mb-4" />
+          <Package size={48} className="text-muted-foreground mx-auto mb-4" />
           <h2 className="font-semibold text-foreground mb-2">{t('orders.loadError')}</h2>
           <p className="text-sm text-muted-foreground mb-4">{t('orders.checkConnection')}</p>
           <Link to="/" className="btn-primary">{t('orders.backHome')}</Link>
@@ -182,7 +183,7 @@ export default function OrdersPage() {
       <div className="section-container py-8">
         {filtered.length === 0 ? (
           <div className="text-center py-20">
-            <Package size={48} className="text-gray-300 mx-auto mb-4" />
+            <Package size={48} className="text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground">{t('orders.none')}</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4">{t('orders.noneHint')}</p>
             <Link to="/marketplace" className="btn-primary">{t('orders.browse')}</Link>
@@ -215,7 +216,7 @@ export default function OrdersPage() {
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>
                             {t(sc.labelKey)}
                           </span>
-                          <span className="text-sm font-bold text-brand">π {order.price}</span>
+                          <Price pi={order.price} className="text-sm font-bold text-brand" inline />
                         </div>
                       </div>
                     </div>

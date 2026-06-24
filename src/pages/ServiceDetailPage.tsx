@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 import { StarRating } from '@/components/shared/StarRating';
+import Price from '@/components/shared/Price';
 import { usePiAuth } from '@/hooks/usePiAuth';
 import { piSDK, piSdkAvailable } from '@/lib/pi';
 import { useLanguage } from '@/i18n';
@@ -353,7 +354,7 @@ export default function ServiceDetailPage() {
                       <AnimatePresence mode="wait">
                         {pkg && (
                           <motion.div key={pkg.name} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}>
-                            <div className="text-3xl font-bold text-brand">π {pkg.price}</div>
+                            <Price pi={pkg.price} className="text-3xl font-bold text-brand" />
                             <p className="text-sm text-muted-foreground mt-1">{pkg.description}</p>
                             <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1"><Clock size={14} /> {pkg.deliveryDays} {t('service.days')}</span>
@@ -362,7 +363,7 @@ export default function ServiceDetailPage() {
                             <ul className="mt-5 space-y-2.5">
                               {pkg.features.map(f => (
                                 <li key={f.text} className="flex items-start gap-2.5 text-sm">
-                                  {f.included ? <Check size={16} className="text-green-500 shrink-0 mt-0.5" /> : <X size={16} className="text-gray-300 shrink-0 mt-0.5" />}
+                                  {f.included ? <Check size={16} className="text-green-500 shrink-0 mt-0.5" /> : <X size={16} className="text-muted-foreground shrink-0 mt-0.5" />}
                                   <span className={f.included ? 'text-foreground' : 'text-muted-foreground line-through'}>{f.text}</span>
                                 </li>
                               ))}
@@ -372,7 +373,7 @@ export default function ServiceDetailPage() {
                       </AnimatePresence>
                     </>
                   ) : (
-                    <div className="text-3xl font-bold text-brand mb-4">π {service.price}</div>
+                    <div className="mb-4"><Price pi={service.price} className="text-3xl font-bold text-brand" /></div>
                   )}
                   <div className="flex items-center justify-center gap-1.5 text-xs text-escrow bg-escrow-light rounded-full px-3 py-1.5">
                     <ShieldCheck size={13} />
