@@ -19,6 +19,7 @@ function normalizeApiService(s: any): Service {
     rating      : s.rating || 0,
     reviewCount : s.reviews || 0,
     price       : s.price,
+    priceCurrency: s.priceCurrency || 'PI',
     deliveryDays: s.deliveryDays || 3,
     image       : s.image || '/images/service-default.jpg',
     escrow      : true,
