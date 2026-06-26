@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingCart, Package, MessageCircle, Bell, Search, Menu, X, LogOut, Smartphone, FileText } from 'lucide-react';
+import { Home, ShoppingCart, Package, MessageCircle, Bell, Search, Menu, X, LogOut, Smartphone, FileText, BookOpen, Newspaper } from 'lucide-react';
 import { useIsDesktop, useIsMobile } from '@/hooks/useMediaQuery';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePiAuth } from '@/hooks/usePiAuth';
@@ -181,7 +181,7 @@ export function Header() {
                   })}
                 </nav>
 
-                {/* ── WHITEPAPER — séparé visuellement ── */}
+                {/* ── RESSOURCES — Whitepaper · Guide · Affiche ── */}
                 <div className="mt-3 pt-3 border-t border-border">
                   <a
                     href="/WorkPiServ_Whitepaper_v1.html"
@@ -194,6 +194,32 @@ export function Header() {
                     <span>{t('footer.whitepaper')}</span>
                     <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-brand/10 text-brand px-2 py-0.5 rounded-full">
                       PDF
+                    </span>
+                  </a>
+                  <a
+                    href="/guide.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-muted-foreground hover:bg-background transition-colors"
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
+                    <BookOpen size={20} className="text-brand" />
+                    <span>Guide</span>
+                    <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+                      FR · AR
+                    </span>
+                  </a>
+                  <a
+                    href="/poster-workpiserv.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-muted-foreground hover:bg-background transition-colors"
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
+                    <Newspaper size={20} className="text-brand" />
+                    <span>Affiche</span>
+                    <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-brand/10 text-brand px-2 py-0.5 rounded-full">
+                      NEW
                     </span>
                   </a>
                 </div>
