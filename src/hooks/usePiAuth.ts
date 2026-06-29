@@ -15,6 +15,9 @@ interface PiUser {
   newOrders: number;
   avatar: string;
   isNewUser?: boolean;
+  termsAccepted?: boolean;        // renvoyé par /api/auth/me (source de vérité)
+  termsVersion?: string;
+  requiredTermsVersion?: string;
 }
 
 interface UsePiAuthReturn {
