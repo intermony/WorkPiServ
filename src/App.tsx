@@ -50,14 +50,11 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isNewUser, clearNewUser, logout, refreshUser } = usePiAuth();
 
-  // ⚠️ On récupère aussi `token` et `logout` depuis usePiAuth pour la porte de
-  // consentement. Si ton hook les nomme autrement (ex. signOut) ou ne les expose
-  // pas, voir les deux solutions de repli en bas de ce fichier.
-  const { user, isNewUser, clearNewUser, token, logout } = usePiAuth();
-
-  // Une fois les CGU acceptées dans cette session, on masque la porte sans recharger.
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  // Masque la porte instantanément après acceptation, le temps que refreshUser()
+  // re-synchronise user.termsAccepted depuis le serveur (la source de vérité).
+  const [justAccepted, setJustAccepted] = useState(false);
 
   // GitHub Pages SPA fallback: 404.html sends deep links to /?redirect=/path.
   // Read that param once on load and route to it client-side.
@@ -75,8 +72,8 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Le Pioneer est connecté mais n'a pas encore accepté la version courante des CGU.
-  const mustAcceptTerms = !!user && !user.termsAccepted && !termsAccepted;
+  // Connecté mais CGU pas encore acceptées (état lu depuis le backend via /api/auth/me).
+  const mustAcceptTerms = !!user && !user.termsAccepted && !justAccepted;
 
   return (
     <LanguageProvider>
@@ -85,9 +82,8 @@ export default function App() {
           « Je ne suis pas d'accord » déconnecte immédiatement le Pioneer. */}
       {mustAcceptTerms && (
         <ConsentGate
-          apiBaseUrl={import.meta.env.VITE_API_URL}
-          token={token}
-          onAccepted={() => setTermsAccepted(true)}
+          apiBaseUrl={import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api-testnet.onrender.com'}
+          onAccepted={() => { setJustAccepted(true); refreshUser(); }}
           onDeclined={logout}
         />
       )}
@@ -127,26 +123,3 @@ export default function App() {
     </LanguageProvider>
   );
 }
-
-/* ───────────────────────────────────────────────────────────────────────────
-   NOTES D'INTÉGRATION (à vérifier une fois, puis tu peux supprimer ce bloc)
-
-   1) `token` et `logout` viennent de usePiAuth. Si ton hook NE les expose PAS :
-
-      • Token via localStorage — remplace `token={token}` par :
-          token={localStorage.getItem('token') || ''}
-        (mets la VRAIE clé sous laquelle tu stockes le JWT après login.)
-
-      • Déconnexion — si ta fonction s'appelle autrement, adapte `onDeclined`.
-        Exemple minimal si tu n'as pas de fonction dédiée :
-          onDeclined={() => { localStorage.removeItem('token'); window.location.href = '/'; }}
-
-      • Si tu utilises un client axios `api` avec le token déjà attaché, tu peux
-        ignorer apiBaseUrl/token et utiliser l'option intégrée de ConsentGate :
-          onAccept={async () => { await api.post('/api/terms/accept', { version: '2026-06-29' }); }}
-
-   2) « Demandé une seule fois » : pour que la porte ne réapparaisse pas aux
-      connexions suivantes, usePiAuth doit conserver le champ `termsAccepted`
-      renvoyé par /api/auth/me. Si ton hook fait setUser(data) (tout l'objet),
-      c'est automatique ; s'il reconstruit un objet typé, ajoute-y `termsAccepted`.
-   ─────────────────────────────────────────────────────────────────────────── */
