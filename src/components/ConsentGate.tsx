@@ -175,7 +175,7 @@ const T: Record<Lang, Locale> = {
 
 interface ConsentGateProps {
   apiBaseUrl: string;
-  token: string;
+  token?: string;
   onAccepted: () => void;
   onDeclined: () => void;
   defaultLang?: Lang;
@@ -202,6 +202,20 @@ export default function ConsentGate({
     if (!checked || submitting) return;
     setSubmitting(true);
     setError(null);
+    // Récupère le JWT : prop `token` si fournie, sinon on le détecte dans le
+    // localStorage (motif JWT à 3 segments) — pas besoin de connaître la clé.
+    const getToken = (): string => {
+      if (token) return token;
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          const v = localStorage.getItem(k) || '';
+          if (/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(v)) return v;
+        }
+      } catch { /* ignore */ }
+      return '';
+    };
     try {
       if (onAccept) {
         await onAccept();
@@ -210,7 +224,7 @@ export default function ConsentGate({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${getToken()}`,
           },
           body: JSON.stringify({ version: TERMS_VERSION }),
         });
