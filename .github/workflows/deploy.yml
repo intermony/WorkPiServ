@@ -18,8 +18,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_BACKEND_URL: https://workpiserv-api-testnet.onrender.com
-          VITE_PI_SANDBOX: true
+          VITE_BACKEND_URL: https://workpiserv-api-mainnet.onrender.com
+          VITE_PI_SANDBOX: false
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
