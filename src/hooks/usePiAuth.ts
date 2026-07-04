@@ -114,7 +114,10 @@ function useProvideAuth(): UsePiAuthReturn {
         .catch(() => { /* navigateur classique : jamais de réponse */ });
       return false;
     } catch (err) {
-      // Auto-login silencieux — pas d'erreur affichée
+      // Réseau instable (timeout/coupure après retry) : message clair à l'UI.
+      // Les autres erreurs restent silencieuses (auto-login).
+      const code = (err as { code?: string }).code;
+      if (code === 'NETWORK_UNSTABLE') setError('auth.networkUnstable');
       console.error('Auth error:', err);
       return false;
     } finally {
