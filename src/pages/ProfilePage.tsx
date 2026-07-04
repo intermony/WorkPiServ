@@ -12,8 +12,7 @@ import WithdrawCard from '@/components/WithdrawCard';
 import RechargeCard from '@/components/RechargeCard';
 import AdminA2UCard from '@/components/AdminA2UCard';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api-testnet.onrender.com';
-
+import { API_BASE_URL as API_URL } from '@/config/network';
 // Adresse publique Pi (format Stellar) : commence par G, 56 caractères
 const PI_ADDRESS_REGEX = /^G[A-Z2-7]{55}$/;
 
