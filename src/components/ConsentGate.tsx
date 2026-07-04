@@ -25,10 +25,11 @@
  */
 
 import { useState } from 'react';
+import { PI_SANDBOX } from '@/config/network';
 
 export const TERMS_VERSION = '2026-06-29'; // doit = CURRENT_TERMS_VERSION (backend)
 // Réseau détecté au build : 'false' (ou absent) => Mainnet ; 'true' => Testnet.
-const IS_MAINNET = String(import.meta.env.VITE_PI_SANDBOX) !== 'true';
+const IS_MAINNET = !PI_SANDBOX;
 
 type Lang = 'fr' | 'en' | 'ar';
 
