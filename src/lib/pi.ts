@@ -45,6 +45,31 @@ interface PiAuthResult {
   accessToken: string;
 }
 
+// ── Réseaux mobiles instables (3G/4G) : timeout par tentative + UN retry ──
+// Une requête qui pend sur un socket 3G moribond est avortée à 12 s ;
+// une seule nouvelle tentative est faite après 1,5 s. Au-delà, l'échec
+// est typé NETWORK_UNSTABLE pour que l'UI affiche un message clair.
+const LOGIN_TIMEOUT_MS = 12000;
+const LOGIN_RETRY_DELAY_MS = 1500;
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export class LoginError extends Error {
+  code: string;
+  constructor(code: string, message?: string) {
+    super(message || code);
+    this.code = code;
+  }
+}
+
 interface OrderData {
   amount: number;
   memo?: string;
@@ -88,7 +113,8 @@ class PiSDK {
       this.onIncompletePaymentFound.bind(this)
     ) as PiAuthResult;
 
-    const res = await fetch(`${API_URL}/api/auth/pi-login`, {
+    // Appel backend avec timeout + un retry automatique (GSM instable)
+    const loginInit: RequestInit = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...apiHeaders() },
       body: JSON.stringify({
@@ -96,10 +122,25 @@ class PiSDK {
         pi_username  : auth.user.username,
         access_token : auth.accessToken,
       })
-    });
+    };
+    let res: Response | null = null;
+    let lastNetworkErr: unknown = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        res = await fetchWithTimeout(`${API_URL}/api/auth/pi-login`, loginInit, LOGIN_TIMEOUT_MS);
+        break;
+      } catch (e) {
+        lastNetworkErr = e; // réseau coupé / timeout — le serveur n'a rien reçu
+        if (attempt === 1) await new Promise(r => setTimeout(r, LOGIN_RETRY_DELAY_MS));
+      }
+    }
+    if (!res) {
+      console.error('Login: échec réseau après retry —', lastNetworkErr);
+      throw new LoginError('NETWORK_UNSTABLE');
+    }
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Authentication failed');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new LoginError(data.code || 'AUTH_FAILED', data.error || 'Authentication failed');
 
     if (data.token) {
       localStorage.setItem('workpiserv_token', data.token);
