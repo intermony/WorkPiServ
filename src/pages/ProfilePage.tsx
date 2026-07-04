@@ -47,7 +47,7 @@ function Avatar({ avatar, size = 72 }: { avatar?: string; size?: number }) {
 
 export default function ProfilePage() {
   const { username: paramUsername } = useParams<{ username?: string }>();
-  const { user, loading, loggedIn, login, logout, refreshUser } = usePiAuth();
+  const { user, loading, loggedIn, login, logout, refreshUser, error: authError } = usePiAuth();
   const { t } = useLanguage();
 
   // ─── Champs étendus renvoyés par /api/auth/me ──────────────
@@ -231,6 +231,9 @@ export default function ProfilePage() {
           </p>
           {piSdkAvailable() && (
             <button onClick={() => login()} className="btn-primary">{t('profile.signIn')}</button>
+          )}
+          {authError && (
+            <p className="text-sm text-red-400 mt-3">{t(authError)}</p>
           )}
         </div>
       </main>
