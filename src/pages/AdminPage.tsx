@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, RefreshCw, BarChart2, Users, Package, X, Send, MessageCircle, Ban, CheckCircle, Eye, EyeOff, ArrowDownToLine, Scale, RotateCcw } from 'lucide-react';
 import { usePiAuth } from '@/hooks/usePiAuth';
-
+import FlaggedUsersTab from '@/admin/FlaggedUsersTab';
 const API = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api-testnet.onrender.com';
 
 interface UserRow {
