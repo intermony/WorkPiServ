@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, createContext, useContext, createElement, type ReactNode } from 'react';
 import { piSDK, isPiBrowser, piSdkAvailable } from '@/lib/pi';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api-testnet.onrender.com';
-
+import { API_BASE_URL as API_URL, apiHeaders } from '@/config/network';
 interface PiUser {
   _id: string;
   uid?: string;
@@ -38,7 +37,7 @@ async function fetchMe(): Promise<PiUser | null> {
   if (!token) return null;
   try {
     const res = await fetch(`${API_URL}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}`, ...apiHeaders() }
     });
     if (!res.ok) return null;
     return await res.json();
