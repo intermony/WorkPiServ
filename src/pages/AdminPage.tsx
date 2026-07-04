@@ -72,6 +72,7 @@ export default function AdminPage() {
   const { user, loggedIn } = usePiAuth();
   const navigate = useNavigate();
 
+  const [tab, setTab] = useState<'stats' | 'users' | 'services' | 'withdrawals' | 'disputes' | 'fraud'>('stats');
   const [tab, setTab] = useState<'stats' | 'users' | 'services' | 'withdrawals' | 'disputes'>('stats');
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
