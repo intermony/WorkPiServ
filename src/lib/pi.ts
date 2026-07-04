@@ -1,8 +1,7 @@
 // بسم الله الرحمن الرحيم
 // WorkPiServ Pi Network SDK Integration
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'https://workpiserv-api.onrender.com';
-
+import { API_BASE_URL as API_URL, PI_SANDBOX, apiHeaders } from '@/config/network';
 // Le SDK est-il chargé ? (vrai partout : Chrome, Pi Browser...)
 export function piSdkAvailable(): boolean {
   return typeof window !== 'undefined' && !!window.Pi;
@@ -69,7 +68,7 @@ class PiSDK {
   async init(): Promise<boolean> {
     if (!window.Pi) return false;
     try {
-      const isSandbox = import.meta.env.VITE_PI_SANDBOX === 'true';
+      const isSandbox = PI_SANDBOX; // déduit du hostname (testnet.* → sandbox)
       window.Pi.init({ version: '2.0', sandbox: isSandbox });
       this.initialized = true;
       console.log(`✅ Pi SDK initialized (${isSandbox ? 'Sandbox' : 'Mainnet'})`);
@@ -91,11 +90,11 @@ class PiSDK {
 
     const res = await fetch(`${API_URL}/api/auth/pi-login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...apiHeaders() },
       body: JSON.stringify({
         pi_uid       : auth.user.uid,
         pi_username  : auth.user.username,
-        access_token : auth.accessToken || auth.user.uid,
+        access_token : auth.accessToken,
       })
     });
 
