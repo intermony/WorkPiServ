@@ -79,7 +79,7 @@ export function Header() {
               <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">π</span>
               </div>
-              <span className="font-heading font-bold text-lg text-navy">Work<span className="text-brand">π</span>Serv</span>
+              <span className="font-heading font-bold text-lg text-navy">WorkPiServ</span>
             </Link>
 
             {isDesktop && (
@@ -155,7 +155,7 @@ export function Header() {
                 <div className="flex items-center justify-between mb-4">
                   <Link to="/" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center"><span className="text-white font-bold text-sm">π</span></div>
-                    <span className="font-heading font-bold text-lg text-navy">Work<span className="text-brand">π</span>Serv</span>
+                    <span className="font-heading font-bold text-lg text-navy">WorkPiServ</span>
                   </Link>
                   <button onClick={() => setMobileDrawerOpen(false)} className="p-2 rounded-lg hover:bg-muted"><X size={20} /></button>
                 </div>
