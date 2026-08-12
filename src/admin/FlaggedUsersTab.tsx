@@ -1,4 +1,4 @@
-// FlaggedUsersTab — onglet Fraude du panneau d'administration WorkπServ
+// FlaggedUsersTab — onglet Fraude du panneau d'administration WorkPiServ
 // ──────────────────────────────────────────────────────────────────────
 // Consomme les endpoints /api/admin/fraud/* (moteur 7 patterns, score
 // 0–100, auto-ban sev ≥ 4). Fiche Pioneer enrichie au dépliage :

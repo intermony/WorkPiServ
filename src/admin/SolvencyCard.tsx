@@ -1,4 +1,4 @@
-// SolvencyCard — cadran de solvabilité du panneau d'administration WorkπServ
+// SolvencyCard — cadran de solvabilité du panneau d'administration WorkPiServ
 // ─────────────────────────────────────────────────────────────────────────
 // Affiche le dernier constat de réconciliation on-chain (invariant :
 // solde wallet ≥ escrow actif + soldes utilisateurs), le surplus (≈
