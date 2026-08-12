@@ -30,7 +30,7 @@ export function Footer() {
   const navigate = useNavigate();
 
   return (
-    <footer className="bg-[#100D26] text-white">
+    <footer className="bg-[#1A1A2E] text-white">
       <div className="section-container py-16 pb-24 md:pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
@@ -122,7 +122,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            &copy; 2026 WorkπServ. {t('footer.rights')}
+            &copy; 2026 WorkPiServ. {t('footer.rights')}
           </p>
           <div className="flex items-center gap-5 flex-wrap justify-center">
             <button
