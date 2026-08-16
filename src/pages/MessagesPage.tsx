@@ -185,7 +185,7 @@ export default function MessagesPage() {
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
                 </div>
                 {conv.unread > 0 && (
-                  <span className="w-5 h-5 bg-brand-light0 text-white text-xs rounded-full flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center shrink-0">
                     {conv.unread}
                   </span>
                 )}
@@ -231,7 +231,7 @@ export default function MessagesPage() {
                   return (
                     <div key={msg._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
-                        isMine ? 'bg-brand-light0 text-white rounded-br-sm' : 'bg-card border border-border text-foreground rounded-bl-sm'
+                        isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-card border border-border text-foreground rounded-bl-sm'
                       }`}>
                         <p>{msg.text}</p>
                         <p className={`text-[10px] mt-1 ${isMine ? 'text-orange-200' : 'text-muted-foreground'}`}>
@@ -257,7 +257,7 @@ export default function MessagesPage() {
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="p-2.5 bg-brand-light0 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
