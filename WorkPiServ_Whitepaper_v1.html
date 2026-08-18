@@ -6,16 +6,16 @@
 <title>WorkPiServ — Whitepaper v1.0</title>
 <style>
   :root {
-    --orange:  #E8621A;
-    --dark:    #1A1F3A;
-    --navy:    #252B4A;
-    --navy2:   #2E3560;
-    --light:   #F5F6FA;
-    --gray:    #8A8FA8;
+    --orange:  #0D9488;
+    --dark:    #0F172A;
+    --navy:    #1E293B;
+    --navy2:   #334155;
+    --light:   #F1F5F9;
+    --gray:    #64748B;
     --white:   #FFFFFF;
-    --green:   #27AE60;
-    --red:     #E74C3C;
-    --orange-bg: #FFF3EC;
+    --green:   #22C55E;
+    --red:     #EF4444;
+    --orange-bg: #CCFBF1;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@
 
   /* ── HERO ── */
   .hero {
-    background: linear-gradient(135deg, var(--dark) 0%, var(--navy) 60%, #2d1a4a 100%);
+    background: linear-gradient(135deg, var(--dark) 0%, var(--navy) 60%, #134E4A 100%);
     color: var(--white);
     text-align: center;
     padding: 5rem 2rem 4rem;
@@ -228,7 +228,7 @@
   tbody tr:nth-child(odd)  { background: var(--white); }
   tbody td {
     padding: 0.7rem 1rem;
-    border-bottom: 1px solid #e8eaf0;
+    border-bottom: 1px solid #E2E8F0;
     vertical-align: middle;
   }
   .ok  { color: var(--green); font-weight: 700; }
@@ -238,7 +238,7 @@
   /* ── CODE BLOCKS ── */
   pre {
     background: var(--navy);
-    color: #a8d8ea;
+    color: #5EEAD4;
     padding: 1.25rem 1.5rem;
     border-radius: 8px;
     font-family: 'Courier New', monospace;
@@ -258,7 +258,7 @@
     margin: 1.2rem 0;
   }
   .callout.security {
-    background: #fff8f5;
+    background: #F0FDFA;
     border-color: var(--orange);
   }
   .callout-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
@@ -277,7 +277,7 @@
   }
   .security-box .lock { font-size: 2.5rem; margin-bottom: 1rem; }
   .security-box h3 { color: var(--orange); font-size: 1.1rem; margin: 0 0 0.75rem; }
-  .security-box p { color: #c8cde0; font-size: 0.95rem; margin: 0; }
+  .security-box p { color: #CBD5E1; font-size: 0.95rem; margin: 0; }
 
   /* ── WALLET DIAGRAM ── */
   .wallet-flow {
@@ -301,7 +301,7 @@
   }
   .wallet-box.wps {
     background: var(--navy2);
-    border: 2px solid #4a5290;
+    border: 2px solid #3B82F6;
     color: var(--white);
   }
   .wallet-box .wlabel {
@@ -320,7 +320,7 @@
   .wallet-box ul {
     list-style: none;
     font-size: 0.85rem;
-    color: #a8b2d0;
+    color: #94A3B8;
     text-align: left;
   }
   .wallet-box ul li::before { content: '› '; color: var(--orange); }
@@ -361,7 +361,7 @@
     text-align: center;
   }
   .step-num.green { background: var(--green); }
-  .step-num.warn  { background: #E67E22; }
+  .step-num.warn  { background: #F59E0B; }
   .step-content strong { display: block; font-size: 0.9rem; color: var(--dark); }
   .step-content span { font-size: 0.85rem; color: var(--gray); }
 
@@ -402,7 +402,7 @@
     text-align: center;
   }
   .road-status.done    { background:#EAFAF1; color:var(--green); }
-  .road-status.ongoing { background:#FEF9E7; color:#E67E22; }
+  .road-status.ongoing { background:#FEF3C7; color:#F59E0B; }
   .road-status.coming  { background:#EEF0F8; color:var(--gray); }
   .road-desc { font-size: 0.9rem; color: var(--dark); }
 
