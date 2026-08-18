@@ -6,35 +6,35 @@
 <title>WorkPiServ — Guide / دليل / Guide / Hướng dẫn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#161236; --bg2:#1E1A42; --card:#221C4D;
-    --text:#E2DEFF; --muted:#9089C8;
-    --brand:#F2622E; --brand2:#E05520; --lav:#B49BFF;
-    --border:#2C2659;
+    --bg:#020617; --bg2:#0F172A; --card:#111827;
+    --text:#E5E7EB; --muted:#9CA3AF;
+    --brand:#14B8A6; --brand2:#0D9488; --lav:#5EEAD4;
+    --border:#1F2937;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
     background:
-      radial-gradient(120% 60% at 85% 0%, rgba(242,98,46,.12), transparent 55%),
-      radial-gradient(90% 50% at 0% 100%, rgba(180,155,255,.12), transparent 55%),
+      radial-gradient(120% 60% at 85% 0%, rgba(20,184,166,.12), transparent 55%),
+      radial-gradient(90% 50% at 0% 100%, rgba(94,234,212,.10), transparent 55%),
       var(--bg);
-    color:var(--text); font-family:'Inter',sans-serif; line-height:1.6;
+    color:var(--text); font-family:'DM Sans',sans-serif; line-height:1.6;
     min-height:100vh; padding:0 0 60px;
   }
-  body[dir="rtl"]{ font-family:'Noto Sans Arabic','Inter',sans-serif; }
+  body[dir="rtl"]{ font-family:'Noto Sans Arabic','DM Sans',sans-serif; }
   .wrap{ max-width:780px; margin:0 auto; padding:0 20px; }
 
   header{ padding:28px 0 18px; position:sticky; top:0; z-index:5;
     background:linear-gradient(var(--bg) 70%, rgba(22,18,54,0)); }
-  .brand{ font-family:'Poppins'; font-weight:800; font-size:26px; letter-spacing:.3px; }
+  .brand{ font-family:'Sora'; font-weight:800; font-size:26px; letter-spacing:.3px; }
   .brand .pi{ color:var(--brand); }
   .tagline{ color:var(--muted); font-size:14px; margin-top:2px; }
 
   .langbar{ display:flex; gap:6px; flex-wrap:nowrap; margin-top:16px; }
   .langbar button{
-    font-family:'Poppins'; font-weight:700; font-size:13px; cursor:pointer;
+    font-family:'Sora'; font-weight:700; font-size:13px; cursor:pointer;
     color:var(--text); background:var(--card); border:1px solid var(--border);
     padding:6px 0; border-radius:99px; transition:all .15s;
     flex:1; text-align:center; min-width:0;
@@ -42,15 +42,15 @@
   .langbar button:hover{ border-color:var(--brand); color:#fff; }
   .langbar button.active{ background:var(--brand); border-color:var(--brand); color:#fff; }
 
-  h1{ font-family:'Poppins'; font-weight:800; font-size:30px; color:#fff;
+  h1{ font-family:'Sora'; font-weight:800; font-size:30px; color:#fff;
     margin:22px 0 6px; line-height:1.15; }
   .intro{ color:var(--text); opacity:.92; margin-bottom:10px; }
-  .testnet{ display:inline-block; background:rgba(180,155,255,.14); color:var(--lav);
+  .testnet{ display:inline-block; background:rgba(94,234,212,.14); color:var(--lav);
     font-size:13px; font-weight:600; padding:5px 12px; border-radius:99px; margin:6px 0 26px; }
 
   section{ background:var(--bg2); border:1px solid var(--border); border-radius:16px;
     padding:22px 22px; margin-bottom:16px; }
-  section h2{ font-family:'Poppins'; font-weight:700; font-size:19px; color:#fff;
+  section h2{ font-family:'Sora'; font-weight:700; font-size:19px; color:#fff;
     margin-bottom:10px; display:flex; align-items:center; gap:10px; }
   section h2 .n{ flex:none; width:30px; height:30px; border-radius:50%;
     background:var(--brand); color:#fff; font-size:15px;
@@ -58,7 +58,7 @@
   section p{ color:var(--text); opacity:.92; margin-bottom:8px; }
   section ul{ margin:6px 0 4px; padding-inline-start:22px; }
   section li{ margin-bottom:6px; color:var(--text); opacity:.92; }
-  .warn{ border-color:var(--brand); background:rgba(242,98,46,.08); }
+  .warn{ border-color:var(--brand); background:rgba(20,184,166,.08); }
   .warn h2 .n{ background:var(--brand); }
   strong,b{ color:#fff; }
   .lav{ color:var(--lav); font-weight:600; }
@@ -72,7 +72,7 @@
   .flow{ display:flex; flex-direction:column; gap:8px; }
   .flow .row{ display:flex; gap:12px; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--border); }
   .flow .row:last-child{ border-bottom:0; }
-  .flow .st{ font-family:'Poppins'; font-weight:600; color:var(--lav); flex:none; min-width:120px; }
+  .flow .st{ font-family:'Sora'; font-weight:600; color:var(--lav); flex:none; min-width:120px; }
 
   footer{ text-align:center; color:var(--muted); font-size:13px; margin-top:28px; }
   footer a{ color:var(--brand); text-decoration:none; }
