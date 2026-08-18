@@ -11,15 +11,15 @@ import { API_BASE_URL as API_URL } from '@/config/network';
 type OrderEx = Order & { buyerRawId: string; freelancerRawId: string };
 
 const statusConfig: Record<OrderStatus, { labelKey: string; color: string; bg: string }> = {
-  active:          { labelKey: 'orders.status.active',          color: 'text-[#0077B6]', bg: 'bg-[#0077B6]/10' },
-  pending_payment: { labelKey: 'orders.status.pending_payment', color: 'text-[#EAB308]', bg: 'bg-[#EAB308]/10' },
+  active:          { labelKey: 'orders.status.active',          color: 'text-[#3B82F6]', bg: 'bg-[#3B82F6]/10' },
+  pending_payment: { labelKey: 'orders.status.pending_payment', color: 'text-[#F59E0B]', bg: 'bg-[#F59E0B]/10' },
   in_progress:     { labelKey: 'orders.status.in_progress',     color: 'text-escrow',    bg: 'bg-escrow-light' },
-  delivered:       { labelKey: 'orders.status.delivered',       color: 'text-[#16A34A]', bg: 'bg-[#16A34A]/10' },
-  completed:       { labelKey: 'orders.status.completed',       color: 'text-[#16A34A]', bg: 'bg-[#16A34A]/10' },
-  cancelled:       { labelKey: 'orders.status.cancelled',       color: 'text-[#DC2626]', bg: 'bg-[#DC2626]/10' },
-  disputed:        { labelKey: 'orders.status.disputed',        color: 'text-[#EAB308]', bg: 'bg-[#EAB308]/10' },
-  refunding:       { labelKey: 'orders.status.refunding',       color: 'text-[#EAB308]', bg: 'bg-[#EAB308]/10' },
-  refunded:        { labelKey: 'orders.status.refunded',        color: 'text-[#DC2626]', bg: 'bg-[#DC2626]/10' },
+  delivered:       { labelKey: 'orders.status.delivered',       color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10' },
+  completed:       { labelKey: 'orders.status.completed',       color: 'text-[#22C55E]', bg: 'bg-[#22C55E]/10' },
+  cancelled:       { labelKey: 'orders.status.cancelled',       color: 'text-[#EF4444]', bg: 'bg-[#EF4444]/10' },
+  disputed:        { labelKey: 'orders.status.disputed',        color: 'text-[#F59E0B]', bg: 'bg-[#F59E0B]/10' },
+  refunding:       { labelKey: 'orders.status.refunding',       color: 'text-[#F59E0B]', bg: 'bg-[#F59E0B]/10' },
+  refunded:        { labelKey: 'orders.status.refunded',        color: 'text-[#EF4444]', bg: 'bg-[#EF4444]/10' },
 };
 
 // Tolère les anciens statuts inconnus (ex. "pending" des premières versions)
@@ -322,7 +322,7 @@ export default function OrdersPage() {
                     (activeOrder.status === 'in_progress' || activeOrder.status === 'delivered') && (
                     <div className="mt-3">
                       {disputeFor === activeOrder.id ? (
-                        <div className="space-y-2 bg-[#EAB308]/5 border border-[#EAB308]/30 rounded-xl p-3">
+                        <div className="space-y-2 bg-[#F59E0B]/5 border border-[#F59E0B]/30 rounded-xl p-3">
                           <textarea
                             value={disputeReason}
                             onChange={(e) => setDisputeReason(e.target.value)}
@@ -343,7 +343,7 @@ export default function OrdersPage() {
                           </div>
                         </div>
                       ) : (
-                        <button onClick={() => setDisputeFor(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#EAB308]/40 text-[#B45309] dark:text-[#EAB308] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#EAB308]/10 transition-colors">
+                        <button onClick={() => setDisputeFor(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#F59E0B]/40 text-[#92400E] dark:text-[#F59E0B] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#F59E0B]/10 transition-colors">
                           <AlertTriangle size={16} /> {t('orders.openDispute')}
                         </button>
                       )}
@@ -366,13 +366,13 @@ export default function OrdersPage() {
                     (activeOrder.status === 'in_progress' || activeOrder.status === 'delivered') && (
                     <div className="mt-3">
                       {cancelConfirm === activeOrder.id ? (
-                        <div className="bg-[#DC2626]/5 border border-[#DC2626]/30 rounded-xl p-3 space-y-2">
+                        <div className="bg-[#EF4444]/5 border border-[#EF4444]/30 rounded-xl p-3 space-y-2">
                           <p className="text-sm text-foreground">{t('orders.cancelConfirm')}</p>
                           <div className="flex gap-2">
                             <button
                               onClick={async () => { const ok = await postAction(activeOrder.id, 'cancel', undefined, 'refunding'); if (ok) setCancelConfirm(null); }}
                               disabled={acting}
-                              className="flex-1 py-2 text-sm rounded-lg bg-[#DC2626] text-white font-medium disabled:opacity-60"
+                              className="flex-1 py-2 text-sm rounded-lg bg-[#EF4444] text-white font-medium disabled:opacity-60"
                             >
                               {acting ? <Loader2 size={14} className="animate-spin mx-auto" /> : t('orders.confirmYes')}
                             </button>
@@ -382,7 +382,7 @@ export default function OrdersPage() {
                           </div>
                         </div>
                       ) : (
-                        <button onClick={() => setCancelConfirm(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#DC2626]/40 text-[#DC2626] dark:text-[#DC2626] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#DC2626]/10 transition-colors">
+                        <button onClick={() => setCancelConfirm(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] dark:text-[#EF4444] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#EF4444]/10 transition-colors">
                           <Ban size={16} /> {t('orders.cancelOrder')}
                         </button>
                       )}
@@ -391,7 +391,7 @@ export default function OrdersPage() {
 
                   {/* Bannières d'état */}
                   {activeOrder.status === 'disputed' && (
-                    <div className="mt-4 text-sm text-[#B45309] dark:text-[#EAB308] bg-[#EAB308]/10 rounded-xl py-3 px-4 flex items-center gap-2">
+                    <div className="mt-4 text-sm text-[#92400E] dark:text-[#F59E0B] bg-[#F59E0B]/10 rounded-xl py-3 px-4 flex items-center gap-2">
                       <AlertTriangle size={16} className="shrink-0" /> {t('orders.disputedBanner')}
                     </div>
                   )}
@@ -401,19 +401,19 @@ export default function OrdersPage() {
                     </div>
                   )}
                   {activeOrder.status === 'refunded' && (
-                    <div className="mt-4 text-sm text-[#DC2626] dark:text-[#DC2626] bg-[#DC2626]/10 rounded-xl py-3 px-4 flex items-center gap-2">
+                    <div className="mt-4 text-sm text-[#EF4444] dark:text-[#EF4444] bg-[#EF4444]/10 rounded-xl py-3 px-4 flex items-center gap-2">
                       <RotateCcw size={16} className="shrink-0" /> {t('orders.refundedBanner')}
                     </div>
                   )}
 
                   {activeOrder.status === 'completed' && (
-                    <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#16A34A] bg-[#16A34A]/10 rounded-xl py-3">
+                    <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#22C55E] bg-[#22C55E]/10 rounded-xl py-3">
                       <CheckCircle2 size={16} /> {t('orders.completedBanner')}
                     </div>
                   )}
 
                   {actionError && (
-                    <p className="text-xs text-[#DC2626] text-center mt-2">{actionError}</p>
+                    <p className="text-xs text-[#EF4444] text-center mt-2">{actionError}</p>
                   )}
                 </div>
 

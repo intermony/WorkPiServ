@@ -333,8 +333,8 @@ export default function AdminPage() {
   const HISTORY_W_STATUSES = ['processing', 'submitted', 'completed', 'failed', 'blocked'];
 
   const W_STYLE: Record<string, string> = {
-    requested: 'text-[#EAB308]', processing: 'text-[#0077B6]', submitted: 'text-[#0077B6]',
-    completed: 'text-[#16A34A]', failed: 'text-[#DC2626]', blocked: 'text-[#DC2626]',
+    requested: 'text-[#F59E0B]', processing: 'text-[#3B82F6]', submitted: 'text-[#3B82F6]',
+    completed: 'text-[#22C55E]', failed: 'text-[#EF4444]', blocked: 'text-[#EF4444]',
   };
   const W_LABEL: Record<string, string> = {
     requested: 'En attente (48h)', processing: 'En cours', submitted: 'Sur la blockchain',
@@ -348,10 +348,10 @@ export default function AdminPage() {
     cancelled: 'Annulé',
   };
   const DISPUTE_STATUS_COLOR: Record<string, string> = {
-    refunding: 'text-[#EAB308]',
-    refunded: 'text-[#16A34A]',
-    completed: 'text-[#0077B6]',
-    cancelled: 'text-[#DC2626]',
+    refunding: 'text-[#F59E0B]',
+    refunded: 'text-[#22C55E]',
+    completed: 'text-[#3B82F6]',
+    cancelled: 'text-[#EF4444]',
   };
 
   return (
@@ -456,7 +456,7 @@ export default function AdminPage() {
                 {!isSelf && (
                   <div className="flex gap-2">
                     <button onClick={() => openContact(u)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1A1A2E]/5 hover:bg-[#1A1A2E]/10 text-navy text-xs font-medium transition-colors">
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#0F172A]/5 hover:bg-[#0F172A]/10 text-navy text-xs font-medium transition-colors">
                       <MessageCircle size={13} /> Écrire
                     </button>
                     {banConfirm === u._id ? (
@@ -485,7 +485,7 @@ export default function AdminPage() {
           {services.map(s => {
             const hidden = s.active === false;
             return (
-              <div key={s._id} className={`bg-card rounded-2xl p-4 border ${hidden ? 'border-[#EAB308]/30 opacity-60' : 'border-border'}`}>
+              <div key={s._id} className={`bg-card rounded-2xl p-4 border ${hidden ? 'border-[#F59E0B]/30 opacity-60' : 'border-border'}`}>
                 <div className="flex items-center gap-3 mb-3">
                   {s.image
                     ? <img src={s.image} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" />
@@ -493,7 +493,7 @@ export default function AdminPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-navy truncate">{s.title || 'Service sans titre'}</span>
-                      {hidden && <span className="text-[10px] font-bold bg-[#EAB308]/15 text-[#EAB308] px-2 py-0.5 rounded-full">MASQUÉ</span>}
+                      {hidden && <span className="text-[10px] font-bold bg-[#F59E0B]/15 text-[#F59E0B] px-2 py-0.5 rounded-full">MASQUÉ</span>}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 truncate">
                       {s.ownerUsername ? `@${s.ownerUsername}` : '—'}{s.category ? ` · ${s.category}` : ''}
@@ -503,7 +503,7 @@ export default function AdminPage() {
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => toggleServiceVisibility(s._id, hidden)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${hidden ? 'bg-[#16A34A]/10 text-[#16A34A] hover:bg-[#16A34A]/20' : 'bg-[#EAB308]/10 text-[#EAB308] hover:bg-[#EAB308]/20'}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors ${hidden ? 'bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20' : 'bg-[#F59E0B]/10 text-[#F59E0B] hover:bg-[#F59E0B]/20'}`}>
                     {hidden ? <><Eye size={13} /> Réafficher</> : <><EyeOff size={13} /> Cacher</>}
                   </button>
                 </div>
@@ -525,10 +525,10 @@ export default function AdminPage() {
                 <p className="text-center text-muted-foreground py-8">Aucun retrait en attente</p>
               )}
               {withdrawals.filter(w => ACTIVE_W_STATUSES.includes(w.status)).map(w => (
-                <div key={w._id} className="bg-card rounded-2xl p-4 border border-[#EAB308]/30">
+                <div key={w._id} className="bg-card rounded-2xl p-4 border border-[#F59E0B]/30">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-navy">{w.amount} π</span>
-                    <span className="text-xs font-medium text-[#EAB308]">{W_LABEL[w.status]}</span>
+                    <span className="text-xs font-medium text-[#F59E0B]">{W_LABEL[w.status]}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {w.username ? `@${w.username}` : '—'}
@@ -539,11 +539,11 @@ export default function AdminPage() {
                   </p>
                   <div className="flex gap-2 mt-3">
                     <button onClick={() => blockWithdrawal(w._id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#DC2626]/10 text-[#DC2626] hover:bg-[#DC2626]/20 transition-colors">
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 transition-colors">
                       <Ban size={13} /> Bloquer
                     </button>
                     <button onClick={() => releaseWithdrawal(w._id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#16A34A]/10 text-[#16A34A] hover:bg-[#16A34A]/20 transition-colors">
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20 transition-colors">
                       <CheckCircle size={13} /> Payer maintenant
                     </button>
                   </div>
@@ -568,7 +568,7 @@ export default function AdminPage() {
                     {w.username ? `@${w.username}` : '—'}
                   </p>
                   {w.txid && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">txid : {w.txid}</p>}
-                  {w.error && <p className="text-[10px] text-[#DC2626] mt-0.5">Erreur : {w.error}</p>}
+                  {w.error && <p className="text-[10px] text-[#EF4444] mt-0.5">Erreur : {w.error}</p>}
                   <p className="text-[10px] text-muted-foreground mt-0.5">
                     {w.createdAt ? new Date(w.createdAt).toLocaleDateString('fr-FR') : '—'}
                   </p>
@@ -599,7 +599,7 @@ export default function AdminPage() {
               {disputes.map(o => {
                 const pending = o.status === 'disputed';
                 return (
-                  <div key={o._id} className={`bg-card rounded-2xl p-4 border ${pending ? 'border-[#EAB308]/30' : 'border-border'}`}>
+                  <div key={o._id} className={`bg-card rounded-2xl p-4 border ${pending ? 'border-[#F59E0B]/30' : 'border-border'}`}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-navy truncate pr-2">{o.serviceId?.title || 'Service'}</span>
                       <span className="font-semibold text-navy shrink-0">{o.amount} π</span>
@@ -608,7 +608,7 @@ export default function AdminPage() {
                       Acheteur {o.buyerId?.username ? `@${o.buyerId.username}` : '—'} · Freelance {o.freelancerId?.username ? `@${o.freelancerId.username}` : '—'}
                     </p>
                     <p className="text-xs mt-1">
-                      <span className={`font-medium ${pending ? 'text-[#EAB308]' : 'text-[#0077B6]'}`}>
+                      <span className={`font-medium ${pending ? 'text-[#F59E0B]' : 'text-[#3B82F6]'}`}>
                         {pending ? 'En litige' : 'Remboursement en cours'}
                       </span>
                     </p>
@@ -621,11 +621,11 @@ export default function AdminPage() {
                     {pending && (
                       <div className="flex gap-2 mt-3">
                         <button onClick={() => refundOrder(o._id)}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#DC2626]/10 text-[#DC2626] hover:bg-[#DC2626]/20 transition-colors">
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 transition-colors">
                           <RotateCcw size={13} /> Rembourser l'acheteur
                         </button>
                         <button onClick={() => releaseOrder(o._id)}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#16A34A]/10 text-[#16A34A] hover:bg-[#16A34A]/20 transition-colors">
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#22C55E]/10 text-[#22C55E] hover:bg-[#22C55E]/20 transition-colors">
                           <CheckCircle size={13} /> Libérer au freelance
                         </button>
                       </div>
