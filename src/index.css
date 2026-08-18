@@ -4,42 +4,43 @@
 
 @layer base {
   :root {
-    --background: 45 20% 96%;
-    --foreground: 240 28% 14%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 240 28% 14%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 28% 14%;
-    --primary: 16 100% 60%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 175 84% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 201 100% 36%;
+    --secondary: 173 80% 40%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 45 15% 91%;
-    --muted-foreground: 220 8% 42%;
-    --accent: 201 100% 36%;
+    --muted: 210 40% 93%;
+    --muted-foreground: 215 25% 40%;
+    --accent: 173 80% 40%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 45 15% 85%;
-    --input: 45 15% 87%;
-    --ring: 16 100% 60%;
+    --border: 210 30% 87%;
+    --input: 210 30% 89%;
+    --ring: 175 84% 32%;
     --radius: 0.625rem;
-    
-    --color-brand: #FF6B35;
-    --color-brand-hover: #E85A2B;
-    --color-brand-light: rgba(255, 107, 53, 0.10);
-    --color-blue: #0077B6;
-    --color-blue-light: rgba(0, 119, 182, 0.10);
-    --color-green: #16A34A;
-    --color-green-light: rgba(22, 163, 74, 0.10);
-    --color-yellow: #EAB308;
-    --color-yellow-light: rgba(234, 179, 8, 0.12);
-    --color-gold: #FFD166;
-    --color-gold-light: rgba(255, 209, 102, 0.15);
-    --color-navy: #004E64;
-    --color-escrow: #0077B6;
-    --font-heading: 'Poppins', system-ui, sans-serif;
-    --font-body: 'Inter', system-ui, sans-serif;
+
+    --color-brand: #0D9488;
+    --color-brand-hover: #0B7C72;
+    --color-brand-light: rgba(13, 148, 136, 0.10);
+    --color-blue: #14B8A6;
+    --color-blue-light: rgba(20, 184, 166, 0.10);
+    --color-green: #22C55E;
+    --color-green-light: rgba(34, 197, 94, 0.10);
+    --color-yellow: #F59E0B;
+    --color-yellow-light: rgba(245, 158, 11, 0.12);
+    --color-gold: #F59E0B;
+    --color-gold-light: rgba(245, 158, 11, 0.15);
+    --color-navy: #0F172A;
+    --color-escrow: #14B8A6;
+    --color-info: #3B82F6;
+    --font-heading: 'Sora', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
   }
 
   * {
@@ -51,7 +52,7 @@
   }
   
   body {
-    @apply bg-[#F7F6F3] text-[#1A1A2E] font-body antialiased;
+    @apply bg-[#F8FAFC] text-[#0F172A] font-body antialiased;
   }
 }
 
@@ -69,19 +70,19 @@
   }
   
   .btn-ghost {
-    @apply text-[#6B6B6B] font-medium px-4 py-2 rounded-full transition-all duration-200 hover:bg-[#EFEDE8] focus:outline-none;
+    @apply text-[#64748B] font-medium px-4 py-2 rounded-full transition-all duration-200 hover:bg-[#F1F5F9] focus:outline-none;
   }
   
   .card-surface {
-    @apply bg-white border border-[#E8E6DF] rounded-2xl shadow-card transition-all duration-300;
+    @apply bg-white border border-[#E2E8F0] rounded-2xl shadow-card transition-all duration-300;
   }
   
   .card-surface-hover {
-    @apply bg-white border border-[#E8E6DF] rounded-2xl shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5 cursor-pointer hover:border-[#0077B6];
+    @apply bg-white border border-[#E2E8F0] rounded-2xl shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5 cursor-pointer hover:border-[#14B8A6];
   }
   
   .text-gradient-brand {
-    @apply bg-gradient-to-r from-brand to-[#FF9466] bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand to-[#14B8A6] bg-clip-text text-transparent;
   }
   
   .skeleton-shimmer {
