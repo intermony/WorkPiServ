@@ -31,9 +31,9 @@ export function DeliveryNotificationBanner({ notifications, onDismiss, onClearAl
   };
 
   return (
-    <div className="mb-3 rounded-xl border-2 border-[#E11D48] bg-[#E11D48]/5 overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[#E11D48]/20 bg-[#E11D48]/10">
-        <div className="flex items-center gap-2 text-[#E11D48] font-semibold text-xs">
+    <div className="mb-3 rounded-xl border-2 border-destructive bg-destructive/5 overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-destructive/20 bg-destructive/10">
+        <div className="flex items-center gap-2 text-destructive font-semibold text-xs">
           <Package size={14} />
           {t('notif.delivery.bannerTitle').replace('{n}', String(notifications.length))}
         </div>
