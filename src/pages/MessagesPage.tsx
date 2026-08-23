@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, User, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
+import { useDeliveryNotifications } from '@/hooks/useDeliveryNotifications';
+import { DeliveryNotificationBanner } from '@/components/shared/DeliveryNotificationBanner';
 
-import { API_BASE_URL as API_URL } from '@/config/network';
+import { API_BASE_URL as API_URL, apiHeaders, handleUnauthorized } from '@/config/network';
+
 interface Conversation {
   _id: string;
   participantId: string;
@@ -47,6 +50,9 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const myId = getMyId();
 
+  // N1 — bandeau notifications de livraison
+  const { latest, markAsRead, markAllAsRead } = useDeliveryNotifications();
+
   // Ouvre directement une conversation avec un vendeur (bouton "Contact" d'une page service).
   useEffect(() => {
     const to = searchParams.get('to');
@@ -63,13 +69,19 @@ export default function MessagesPage() {
     });
   }, [searchParams, loadingConvs, conversations, activeConv]);
 
+  // N1 — quand on arrive via le bandeau avec ?notif=xxx, on marque la notif comme lue
+  useEffect(() => {
+    const notifId = searchParams.get('notif');
+    if (notifId) markAsRead(notifId);
+  }, [searchParams, markAsRead]);
+
   useEffect(() => {
     const token = getToken();
     if (!token) { setLoadingConvs(false); return; }
     fetch(`${API_URL}/api/messages/conversations`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: apiHeaders({ Authorization: `Bearer ${token}` })
     })
-      .then(r => r.ok ? r.json() : [])
+      .then(r => { if (!r.ok) { handleUnauthorized(r.status); return []; } return r.json(); })
       .then(data => setConversations(Array.isArray(data) ? data : []))
       .catch(() => setConversations([]))
       .finally(() => setLoadingConvs(false));
@@ -80,9 +92,9 @@ export default function MessagesPage() {
     setLoadingMsgs(true);
     const token = getToken();
     fetch(`${API_URL}/api/messages/chat/${activeConv.participantId}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
+      headers: apiHeaders(token ? { Authorization: `Bearer ${token}` } : {})
     })
-      .then(r => r.ok ? r.json() : [])
+      .then(r => { if (!r.ok) { handleUnauthorized(r.status); return []; } return r.json(); })
       .then(data => setMessages(Array.isArray(data) ? data : []))
       .catch(() => setMessages([]))
       .finally(() => setLoadingMsgs(false));
@@ -111,7 +123,7 @@ export default function MessagesPage() {
     try {
       const res = await fetch(`${API_URL}/api/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: apiHeaders({ 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }),
         body: JSON.stringify({ recver_id: activeConv.participantId, text }),
       });
       if (res.ok) {
@@ -122,6 +134,8 @@ export default function MessagesPage() {
             ? { ...c, lastMessage: text, lastMessageAt: new Date().toISOString() }
             : c
         ));
+      } else {
+        handleUnauthorized(res.status);
       }
     } catch {
       // keep optimistic message
@@ -152,6 +166,12 @@ export default function MessagesPage() {
         <div className="p-4 border-b border-border">
           <h2 className="font-semibold text-foreground text-lg">{t('nav.messages')}</h2>
         </div>
+        {/* N1 — bandeau livraisons non lues, affiché au-dessus de la liste des conversations */}
+        <DeliveryNotificationBanner
+          notifications={latest}
+          onDismiss={markAsRead}
+          onClearAll={markAllAsRead}
+        />
         <div className="flex-1 overflow-y-auto">
           {loadingConvs ? (
             <div className="flex items-center justify-center h-32 gap-2 text-muted-foreground">
@@ -171,7 +191,7 @@ export default function MessagesPage() {
                 onClick={() => setActiveConv(conv)}
                 className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-background transition-colors text-left border-b border-border ${activeConv?._id === conv._id ? 'bg-brand-light' : ''}`}
               >
-                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shrink-0 text-sm font-bold">
+                <div className="w-10 h-10 rounded-full bg-brand-light flex items-center justify-center text-brand shrink-0 text-sm font-bold">
                   {conv.participantAvatar
                     ? <img src={conv.participantAvatar} className="w-10 h-10 rounded-full object-cover" alt="" />
                     : conv.participantName.charAt(0).toUpperCase()
@@ -185,7 +205,7 @@ export default function MessagesPage() {
                   <p className="text-xs text-muted-foreground truncate mt-0.5">{conv.lastMessage}</p>
                 </div>
                 {conv.unread > 0 && (
-                  <span className="w-5 h-5 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 bg-brand text-white text-xs rounded-full flex items-center justify-center shrink-0">
                     {conv.unread}
                   </span>
                 )}
@@ -207,7 +227,7 @@ export default function MessagesPage() {
               <button onClick={() => { setActiveConv(null); navigate('/messages'); }} className="md:hidden p-1 text-muted-foreground">
                 <ArrowLeft size={20} />
               </button>
-              <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold shrink-0">
+              <div className="w-9 h-9 bg-brand-light rounded-full flex items-center justify-center text-brand font-bold shrink-0">
                 {activeConv.participantAvatar
                   ? <img src={activeConv.participantAvatar} className="w-9 h-9 rounded-full object-cover" alt="" />
                   : <User size={18} />
@@ -231,10 +251,10 @@ export default function MessagesPage() {
                   return (
                     <div key={msg._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
-                        isMine ? 'bg-orange-500 text-white rounded-br-sm' : 'bg-card border border-border text-foreground rounded-bl-sm'
+                        isMine ? 'bg-brand text-white rounded-br-sm' : 'bg-card border border-border text-foreground rounded-bl-sm'
                       }`}>
                         <p>{msg.text}</p>
-                        <p className={`text-[10px] mt-1 ${isMine ? 'text-orange-200' : 'text-muted-foreground'}`}>
+                        <p className={`text-[10px] mt-1 ${isMine ? 'text-brand-light' : 'text-muted-foreground'}`}>
                           {formatTime(msg.created_at)}
                         </p>
                       </div>
@@ -251,13 +271,13 @@ export default function MessagesPage() {
                 value={newMessage}
                 onChange={e => setNewMessage(e.target.value)}
                 placeholder={t('messages.writePh')}
-                className="flex-1 px-4 py-2 bg-muted border border-transparent rounded-full text-sm focus:outline-none focus:bg-card focus:border-orange-500 transition-all"
+                className="flex-1 px-4 py-2 bg-muted border border-transparent rounded-full text-sm focus:outline-none focus:bg-card focus:border-brand transition-all"
                 disabled={sending}
               />
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="p-2.5 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2.5 bg-brand text-white rounded-full hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
               </button>
