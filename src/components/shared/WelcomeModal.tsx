@@ -41,8 +41,8 @@ const SLIDES = [
   },
   {
     emoji: '🔒',
-    bgColor: 'bg-purple-50',
-    accentColor: 'text-purple-600',
+    bgColor: 'bg-escrow-light',
+    accentColor: 'text-escrow',
     titleKey: 'onboard.slide4Title',
     descKey: 'onboard.slide4Desc',
     highlight: 'onboard.slide4Highlight',
@@ -164,8 +164,8 @@ export function WelcomeModal({ username, onClose }: WelcomeModalProps) {
 
                     {/* Highlight sécurité (slide 3) */}
                     {'highlight' in current && current.highlight && (
-                      <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 text-left">
-                        <p className="text-sm text-purple-700 font-semibold">
+                      <div className="bg-escrow-light border border-escrow/20 rounded-xl p-3 text-left">
+                        <p className="text-sm text-escrow font-semibold">
                           ✅ {t(current.highlight)}
                         </p>
                       </div>
