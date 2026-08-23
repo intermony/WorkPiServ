@@ -393,4 +393,254 @@ export default function OrdersPage() {
           <div className="text-center py-20">
             <Package size={48} className="text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground">{t('orders.none')}</h3>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">{t('orders.noneHint')}</
+            <p className="text-sm text-muted-foreground mt-1 mb-4">{t('orders.noneHint')}</p>
+            <Link to="/marketplace" className="btn-primary">{t('orders.browse')}</Link>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* List */}
+            <div className="lg:w-[360px] shrink-0 space-y-3">
+              {filtered.map(order => {
+                const sc = getStatusConfig(order.status);
+                return (
+                  <div
+                    key={order.id}
+                    onClick={() => setSelectedId(order.id)}
+                    className={`card-surface p-4 cursor-pointer transition-all ${
+                      activeOrder?.id === order.id ? 'border-brand ring-1 ring-brand' : 'card-surface-hover'
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <img
+                        src={order.serviceImage}
+                        alt={order.serviceTitle}
+                        className="w-20 h-14 rounded-lg object-cover shrink-0 bg-muted"
+                        onError={(e) => { const t = e.target as HTMLImageElement; t.style.display='none'; const fb = t.parentElement?.querySelector('.img-fallback') as HTMLElement; if(fb) fb.style.display='flex'; }}
+                      />
+                      <div className="img-fallback w-20 h-14 rounded-lg shrink-0 bg-gradient-to-br from-[#F7F6F3] via-[#EFEDE8] to-[#E8E6DF] items-center justify-center hidden">
+                        <span className="text-white text-xs font-bold opacity-60">π</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-navy text-sm line-clamp-1">{order.serviceTitle}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">{order.freelancer.name}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${sc.bg} ${sc.color}`}>
+                            {t(sc.labelKey)}
+                          </span>
+                          <Price pi={order.price} className="text-sm font-bold text-brand" inline />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Detail */}
+            {activeOrder && (
+              <div className="flex-1 min-w-0 space-y-4">
+                <div className="card-surface p-6">
+                  <div className="flex gap-4">
+                    <img
+                      src={activeOrder.serviceImage}
+                      alt={activeOrder.serviceTitle}
+                      className="w-24 h-16 rounded-lg object-cover shrink-0 bg-muted"
+                      onError={(e) => { const t = e.target as HTMLImageElement; t.style.display='none'; const fb = t.parentElement?.querySelector('.img-fallback') as HTMLElement; if(fb) fb.style.display='flex'; }}
+                    />
+                    <div className="img-fallback w-24 h-16 rounded-lg shrink-0 bg-gradient-to-br from-[#F7F6F3] via-[#EFEDE8] to-[#E8E6DF] items-center justify-center hidden">
+                    <span className="text-white text-xs font-bold opacity-60">π</span>
+                  </div>
+                    <div className="flex-1">
+                      <h2 className="font-semibold text-navy">{activeOrder.serviceTitle}</h2>
+                      <p className="text-sm text-muted-foreground mt-1">{activeOrder.freelancer.name}</p>
+                      <div className="flex flex-wrap gap-2 mt-2 text-xs text-muted-foreground">
+                        <span>{activeOrder.orderId}</span>
+                        <span>{activeOrder.date}</span>
+                        <span className="bg-brand-light text-brand px-2 py-0.5 rounded-full">{activeOrder.package}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Escrow */}
+                  <div className="mt-4 bg-escrow-light border border-escrow/30 rounded-xl p-4 flex items-center gap-3">
+                    <Shield size={22} className="text-escrow shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-escrow text-sm">{t('orders.escrowTitle')}</p>
+                      <p className="text-xs text-muted-foreground">{t('orders.escrowBody').replace('{n}', String(activeOrder.price))}</p>
+                    </div>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getStatusConfig(activeOrder.status).bg} ${getStatusConfig(activeOrder.status).color}`}>
+                      {t(getStatusConfig(activeOrder.status).labelKey)}
+                    </span>
+                  </div>
+
+                  <OrderTimeline order={activeOrder} t={t} />
+                  <MilestoneTracker
+                    order={activeOrder}
+                    myId={myId}
+                    t={t}
+                    acting={acting}
+                    onAdd={title => addMilestone(activeOrder.id, title)}
+                    onMarkDone={mid => markMilestoneDone(activeOrder.id, mid)}
+                    onApprove={mid => approveMilestone(activeOrder.id, mid)}
+                  />
+
+                  {/* Actions selon le rôle */}
+                  {myId === activeOrder.freelancerRawId &&
+                    (activeOrder.status === 'active' || activeOrder.status === 'in_progress') && (
+                    <button
+                      onClick={() => doOrderAction(activeOrder.id, 'deliver')}
+                      disabled={acting}
+                      className="btn-primary w-full mt-4 py-3 flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {acting ? <Loader2 size={16} className="animate-spin" /> : <Truck size={16} />}
+                      {t('orders.markDelivered')}
+                    </button>
+                  )}
+
+                  {myId === activeOrder.buyerRawId && activeOrder.status === 'delivered' && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => doOrderAction(activeOrder.id, 'complete')}
+                        disabled={acting}
+                        className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-60"
+                      >
+                        {acting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                        {t('orders.confirmRelease').replace('{n}', String(activeOrder.price))}
+                      </button>
+                      <p className="text-xs text-muted-foreground text-center mt-2">
+                        {t('orders.confirmHint')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Litige — ouvrable par l'acheteur OU le freelance (commande en cours / livrée) */}
+                  {(myId === activeOrder.buyerRawId || myId === activeOrder.freelancerRawId) &&
+                    (activeOrder.status === 'in_progress' || activeOrder.status === 'delivered') && (
+                    <div className="mt-3">
+                      {disputeFor === activeOrder.id ? (
+                        <div className="space-y-2 bg-[#F59E0B]/5 border border-[#F59E0B]/30 rounded-xl p-3">
+                          <textarea
+                            value={disputeReason}
+                            onChange={(e) => setDisputeReason(e.target.value)}
+                            placeholder={t('orders.disputeReasonPlaceholder')}
+                            className="w-full bg-background text-foreground placeholder:text-muted-foreground border border-border rounded-lg p-2 text-sm resize-none h-20 focus:outline-none focus:border-brand"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={async () => { const ok = await postAction(activeOrder.id, 'dispute', { reason: disputeReason }, 'disputed'); if (ok) { setDisputeFor(null); setDisputeReason(''); } }}
+                              disabled={acting}
+                              className="btn-primary flex-1 py-2 text-sm disabled:opacity-60"
+                            >
+                              {acting ? <Loader2 size={14} className="animate-spin mx-auto" /> : t('orders.submitDispute')}
+                            </button>
+                            <button onClick={() => { setDisputeFor(null); setDisputeReason(''); }} className="flex-1 py-2 text-sm rounded-lg border border-border text-muted-foreground">
+                              {t('orders.formCancel')}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setDisputeFor(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#F59E0B]/40 text-[#92400E] dark:text-[#F59E0B] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#F59E0B]/10 transition-colors">
+                          <AlertTriangle size={16} /> {t('orders.openDispute')}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Acheteur — remboursement si jamais livré (le backend vérifie le délai de 7 j) */}
+                  {myId === activeOrder.buyerRawId && activeOrder.status === 'in_progress' && (
+                    <button
+                      onClick={async () => { const ok = await postAction(activeOrder.id, 'request-refund'); if (ok) setOrders(prev => prev.map(o => (o.id === activeOrder.id ? { ...o, status: 'refunding' } : o))); }}
+                      disabled={acting}
+                      className="w-full mt-3 py-2.5 rounded-xl border border-border text-muted-foreground text-sm font-medium flex items-center justify-center gap-2 hover:bg-background disabled:opacity-60 transition-colors"
+                    >
+                      <RotateCcw size={16} /> {t('orders.requestRefund')}
+                    </button>
+                  )}
+
+                  {/* Freelance — annuler & rembourser l'acheteur */}
+                  {myId === activeOrder.freelancerRawId &&
+                    (activeOrder.status === 'in_progress' || activeOrder.status === 'delivered') && (
+                    <div className="mt-3">
+                      {cancelConfirm === activeOrder.id ? (
+                        <div className="bg-[#EF4444]/5 border border-[#EF4444]/30 rounded-xl p-3 space-y-2">
+                          <p className="text-sm text-foreground">{t('orders.cancelConfirm')}</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={async () => { const ok = await postAction(activeOrder.id, 'cancel', undefined, 'refunding'); if (ok) setCancelConfirm(null); }}
+                              disabled={acting}
+                              className="flex-1 py-2 text-sm rounded-lg bg-[#EF4444] text-white font-medium disabled:opacity-60"
+                            >
+                              {acting ? <Loader2 size={14} className="animate-spin mx-auto" /> : t('orders.confirmYes')}
+                            </button>
+                            <button onClick={() => setCancelConfirm(null)} className="flex-1 py-2 text-sm rounded-lg border border-border text-muted-foreground">
+                              {t('orders.confirmNo')}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => setCancelConfirm(activeOrder.id)} className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] dark:text-[#EF4444] text-sm font-medium flex items-center justify-center gap-2 hover:bg-[#EF4444]/10 transition-colors">
+                          <Ban size={16} /> {t('orders.cancelOrder')}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Bannières d'état */}
+                  {activeOrder.status === 'disputed' && (
+                    <div className="mt-4 text-sm text-[#92400E] dark:text-[#F59E0B] bg-[#F59E0B]/10 rounded-xl py-3 px-4 flex items-center gap-2">
+                      <AlertTriangle size={16} className="shrink-0" /> {t('orders.disputedBanner')}
+                    </div>
+                  )}
+                  {activeOrder.status === 'refunding' && (
+                    <div className="mt-4 text-sm text-muted-foreground bg-muted rounded-xl py-3 px-4 flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin shrink-0" /> {t('orders.refundingBanner')}
+                    </div>
+                  )}
+                  {activeOrder.status === 'refunded' && (
+                    <div className="mt-4 text-sm text-[#EF4444] dark:text-[#EF4444] bg-[#EF4444]/10 rounded-xl py-3 px-4 flex items-center gap-2">
+                      <RotateCcw size={16} className="shrink-0" /> {t('orders.refundedBanner')}
+                    </div>
+                  )}
+
+                  {activeOrder.status === 'completed' && (
+                    <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#22C55E] bg-[#22C55E]/10 rounded-xl py-3">
+                      <CheckCircle2 size={16} /> {t('orders.completedBanner')}
+                    </div>
+                  )}
+
+                  {actionError && (
+                    <p className="text-xs text-[#EF4444] text-center mt-2">{actionError}</p>
+                  )}
+                </div>
+
+                {/* Deliverables */}
+                <div className="card-surface p-6">
+                  <h3 className="font-semibold text-navy mb-3">{t('orders.deliverables')}</h3>
+                  {(activeOrder.deliverables ?? []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-6">
+                      {activeOrder.status === 'in_progress'
+                        ? t('orders.workInProgress')
+                        : t('orders.noDeliverables')}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {(activeOrder.deliverables ?? []).map((file, i) => (
+                        <div key={i} className="flex items-center gap-3 p-3 border border-border rounded-lg">
+                          <Package size={18} className="text-brand shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-navy truncate">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">{file.size}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
