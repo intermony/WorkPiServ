@@ -11,13 +11,13 @@ export default function SafetyPage() {
           <h2 className="font-bold text-blue-800 mb-2">✅ Pi Network Verified</h2>
           <p className="text-blue-700 text-sm">All users are authenticated via Pi Network — real humans, KYC verified by Pi Core Team.</p>
         </div>
-        <div className="p-6 bg-brand-light rounded-xl border border-orange-200">
-          <h2 className="font-bold text-orange-800 mb-2">⚖️ Dispute Resolution</h2>
-          <p className="text-orange-700 text-sm">Our team resolves disputes within 48 hours. Blockchain transaction records ensure full transparency.</p>
+        <div className="p-6 bg-brand-light rounded-xl border border-brand/20">
+          <h2 className="font-bold text-brand mb-2">⚖️ Dispute Resolution</h2>
+          <p className="text-brand text-sm">Our team resolves disputes within 48 hours. Blockchain transaction records ensure full transparency.</p>
         </div>
-        <div className="p-6 bg-purple-50 rounded-xl border border-purple-200">
-          <h2 className="font-bold text-purple-800 mb-2">🔒 Blockchain Security</h2>
-          <p className="text-purple-700 text-sm">All transactions are recorded on the Pi blockchain — immutable, transparent, and secure.</p>
+        <div className="p-6 bg-slate-50 rounded-xl border border-slate-200">
+          <h2 className="font-bold text-slate-800 mb-2">🔒 Blockchain Security</h2>
+          <p className="text-slate-600 text-sm">All transactions are recorded on the Pi blockchain — immutable, transparent, and secure.</p>
         </div>
       </div>
     </div>
