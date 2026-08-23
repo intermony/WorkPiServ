@@ -12,11 +12,11 @@ export function FreelancerCTA() {
         <ScrollReveal>
           <div className="relative overflow-hidden bg-gradient-to-br from-brand to-[#14B8A6] rounded-3xl px-8 py-12 lg:px-16 lg:py-16 text-center">
             <motion.span
-              className="absolute -bottom-6 -right-6 text-[150px] font-heading font-bold text-white/10 select-none"
+              className="absolute -bottom-6 -right-6 text-[110px] font-heading font-bold text-white/10 select-none"
               animate={{ y: [-4, 4] }}
               transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
             >
-              π
+              Pi
             </motion.span>
 
             <h2 className="font-heading font-bold text-2xl lg:text-3xl text-white relative z-10">

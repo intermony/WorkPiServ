@@ -15,7 +15,7 @@ export function HeroSection() {
         animate={{ y: [-8, 8] }}
         transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
       >
-        <span className="text-[200px] font-heading font-bold text-brand/10 select-none">π</span>
+        <span className="text-[140px] font-heading font-bold text-brand/10 select-none">Pi</span>
       </motion.div>
 
       <div className="section-container relative z-10 py-20 lg:py-32">
