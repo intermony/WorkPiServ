@@ -10,7 +10,7 @@ import type { Service } from '@/types';
 
 import { useLanguage } from '@/i18n';
 
-import { API_BASE_URL as API_URL } from '@/config/network';
+import { API_BASE_URL as API_URL, apiHeaders } from '@/config/network';
 const sortOptions = [
   { value: 'popular',    label: 'market.sort.popular' },
   { value: 'newest',     label: 'market.sort.newest' },
@@ -91,7 +91,7 @@ export default function MarketplacePage() {
       if (searchQuery) params.set('q', searchQuery);
       if (activeSort)  params.set('sort', activeSort);
 
-      const res = await fetch(`${API_URL}/api/services?${params}`);
+      const res = await fetch(`${API_URL}/api/services?${params}`, { headers: apiHeaders() });
       if (res.ok) {
         const data = await res.json();
         const raw: unknown[] = Array.isArray(data) ? data : data.services || [];
@@ -300,24 +300,24 @@ export default function MarketplacePage() {
           )}
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <p className="text-sm text-muted-foreground">
                 {loading
                   ? t('market.loadingServices')
                   : t('market.showing').replace('{n}', String(filteredServices.length)).replace('{m}', String(allServices.length))}
               </p>
-              <div className="flex items-center gap-2 relative">
+              <div className="flex items-center gap-2 relative flex-wrap">
                 {!isDesktop && (
                   <button
                     onClick={() => setMobileFilterOpen(true)}
-                    className="btn-secondary text-sm py-2 px-4 flex items-center gap-2"
+                    className="btn-secondary text-sm h-10 px-4 flex items-center gap-2 shrink-0"
                   >
                     <Filter size={16} /> {t('market.filters')}
                   </button>
                 )}
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-navy transition-colors bg-card border border-border rounded-lg px-4 py-2"
+                  className="flex items-center gap-2 text-sm h-10 px-4 text-muted-foreground hover:text-navy transition-colors bg-card border-[1.5px] border-border rounded-full shrink-0 whitespace-nowrap"
                 >
                   {t(sortOptions.find(o => o.value === activeSort)?.label || '')}
                   <ChevronDown size={16} />
