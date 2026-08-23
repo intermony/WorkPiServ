@@ -19,7 +19,7 @@ export function ServiceCard({ service, index = 0 }: ServiceCardProps) {
 
   const hasImage = !!service.image && !imgError;
   const hasAvatar = !!service.freelancer.avatar && !avatarError;
-  const initial = (service.freelancer.name || 'π').charAt(0).toUpperCase();
+  const initial = (service.freelancer.name || 'P').charAt(0).toUpperCase();
 
   return (
     <motion.div
@@ -45,7 +45,7 @@ export function ServiceCard({ service, index = 0 }: ServiceCardProps) {
               </>
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[#F8FAFC] via-[#F1F5F9] to-[#E2E8F0] flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
-                <span className="text-[110px] font-bold leading-none select-none text-[#0D9488] opacity-30">π</span>
+                <span className="text-[64px] font-bold leading-none select-none text-[#0D9488] opacity-30">Pi</span>
                 <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-white/40 text-xs font-semibold tracking-widest uppercase">WorkPiServ</span>
               </div>
             )}
