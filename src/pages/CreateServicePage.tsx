@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ChevronDown, Loader2, CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/i18n';
+import { ServiceImageUpload } from '@/components/ServiceImageUpload';
 
-import { API_BASE_URL as API_URL } from '@/config/network';
+import { API_BASE_URL as API_URL, apiHeaders, handleUnauthorized } from '@/config/network';
 const CATEGORIES = [
   { id: 'design',      name: 'Design' },
   { id: 'development', name: 'Development' },
@@ -28,8 +29,32 @@ export default function CreateServicePage() {
   const [priceCurrency, setPriceCurrency] = useState<'PI' | 'USD'>('PI');
   const [deliveryDays, setDelivery] = useState('3');
   const [description, setDesc]      = useState('');
+  const [image, setImage]           = useState('');
 
   const isValid = title.trim().length >= 10 && category && Number(price) > 0 && description.trim().length >= 30;
+
+  async function handleImageUpload(file: File) {
+    let token: string | null = null;
+    try { token = localStorage.getItem('workpiserv_token'); } catch { token = null; }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await fetch(`${API_URL}/api/services/upload-image`, {
+      method: 'POST',
+      headers: apiHeaders({
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      }),
+      body: formData,
+    });
+
+    if (!res.ok) {
+      handleUnauthorized(res.status);
+      throw new Error('upload failed');
+    }
+    const data = await res.json();
+    setImage(data.imageUrl);
+  }
 
   async function handleSubmit() {
     if (!isValid) return;
@@ -41,10 +66,10 @@ export default function CreateServicePage() {
     try {
       const res = await fetch(`${API_URL}/api/services`, {
         method: 'POST',
-        headers: {
+        headers: apiHeaders({
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        }),
         body: JSON.stringify({
           title: title.trim(),
           category,
@@ -52,6 +77,7 @@ export default function CreateServicePage() {
           priceCurrency,
           deliveryDays: Number(deliveryDays),
           description: description.trim(),
+          image,
         }),
       });
 
@@ -59,6 +85,7 @@ export default function CreateServicePage() {
         setSuccess(true);
         setTimeout(() => navigate('/profile'), 2000);
       } else {
+        handleUnauthorized(res.status);
         const data = await res.json().catch(() => ({}));
         setError((data as { message?: string }).message || t('create.failed'));
       }
@@ -145,7 +172,6 @@ export default function CreateServicePage() {
                 <label className="block text-sm font-semibold text-navy mb-1.5">
                   {t('create.price')} <span className="text-brand">*</span>
                 </label>
-                {/* Devise : PI (montant fixe) ou USD (montant Pi verrouillé à la commande) */}
                 <div className="flex gap-1 mb-2">
                   {(['PI', 'USD'] as const).map(c => (
                     <button
@@ -208,8 +234,21 @@ export default function CreateServicePage() {
             <p className="text-xs text-muted-foreground mt-1 text-right">{description.length}/2000</p>
           </div>
 
+          {/* Cover image */}
+          <ServiceImageUpload
+            currentImage={image}
+            onUpload={handleImageUpload}
+            onRemove={() => setImage('')}
+            label={t('create.image')}
+            hint={t('create.imageHint')}
+            uploadingLabel={t('create.imageUploading')}
+            errorFormat={t('create.imageErrorFormat')}
+            errorSize={t('create.imageErrorSize')}
+            errorGeneric={t('create.imageErrorGeneric')}
+          />
+
           {/* Escrow note */}
-          <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-sm text-purple-700">
+          <div className="bg-escrow-light border border-escrow/20 rounded-xl p-4 text-sm text-escrow">
             {t('create.escrowNote')}
           </div>
 
