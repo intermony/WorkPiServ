@@ -19,7 +19,8 @@ interface Withdrawal {
 interface Strings {
   title: string; sub: string; available: string; min: string; placeholder: string;
   btn: string; sending: string; histTitle: string; histEmpty: string;
-  errInvalid: string; errInsufficient: string; okRequested: string;
+  errInvalid: string; errInsufficient: string; okRequested: string; lockedNote: string;
+  releaseIn: string; releaseToday: string;
   st: Record<WStatus, string>;
 }
 
@@ -31,6 +32,9 @@ const STR: Record<string, Strings> = {
     btn: 'Withdraw', sending: 'Sending…', histTitle: 'Recent withdrawals', histEmpty: 'No withdrawals yet.',
     errInvalid: 'Enter a valid amount.', errInsufficient: 'Insufficient balance.',
     okRequested: 'Withdrawal requested. It will be paid within 48h unless reviewed.',
+    lockedNote: '{n} π are still under the 15-day security hold and not yet withdrawable.',
+    releaseIn: 'unlocks in {d}d',
+    releaseToday: 'unlocks today',
     st: { requested: 'Pending (48h)', processing: 'Processing', submitted: 'On blockchain', completed: 'Paid', failed: 'Failed (refunded)', blocked: 'Blocked (refunded)' },
   },
   fr: {
@@ -40,6 +44,9 @@ const STR: Record<string, Strings> = {
     btn: 'Retirer', sending: 'Envoi…', histTitle: 'Retraits récents', histEmpty: 'Aucun retrait pour le moment.',
     errInvalid: 'Entrez un montant valide.', errInsufficient: 'Solde insuffisant.',
     okRequested: 'Demande enregistrée. Versement sous 48h sauf vérification.',
+    lockedNote: '{n} π sont encore sous le délai de sécurité de 15 jours, pas encore retirables.',
+    releaseIn: 'débloqué dans {d}j',
+    releaseToday: 'débloqué aujourd\u2019hui',
     st: { requested: 'En attente (48h)', processing: 'En cours', submitted: 'Sur la blockchain', completed: 'Versé', failed: 'Échec (remboursé)', blocked: 'Bloqué (remboursé)' },
   },
   ar: {
@@ -49,6 +56,9 @@ const STR: Record<string, Strings> = {
     btn: 'سحب', sending: 'جارٍ الإرسال…', histTitle: 'عمليات السحب الأخيرة', histEmpty: 'لا توجد عمليات سحب بعد.',
     errInvalid: 'أدخل مبلغًا صحيحًا.', errInsufficient: 'الرصيد غير كافٍ.',
     okRequested: 'تم تسجيل الطلب. الدفع خلال 48 ساعة ما لم تتم المراجعة.',
+    lockedNote: 'لا يزال {n} π ضمن فترة الأمان لمدة 15 يومًا وغير قابل للسحب بعد.',
+    releaseIn: 'يُفرج عنه خلال {d} يوم',
+    releaseToday: 'يُفرج عنه اليوم',
     st: { requested: 'قيد الانتظار (48س)', processing: 'قيد المعالجة', submitted: 'على البلوكشين', completed: 'تم الدفع', failed: 'فشل (مُسترد)', blocked: 'محظور (مُسترد)' },
   },
   zh: {
@@ -58,6 +68,9 @@ const STR: Record<string, Strings> = {
     btn: '提现', sending: '发送中…', histTitle: '最近的提现', histEmpty: '暂无提现记录。',
     errInvalid: '请输入有效金额。', errInsufficient: '余额不足。',
     okRequested: '提现已申请。将在 48 小时内支付，除非需要审核。',
+    lockedNote: '{n} π 仍处于15天安全锁定期内，尚不可提现。',
+    releaseIn: '{d}天后解锁',
+    releaseToday: '今日解锁',
     st: { requested: '等待中（48小时）', processing: '处理中', submitted: '区块链处理中', completed: '已支付', failed: '失败（已退款）', blocked: '已拦截（已退款）' },
   },
   vi: {
@@ -67,6 +80,9 @@ const STR: Record<string, Strings> = {
     btn: 'Rút tiền', sending: 'Đang gửi…', histTitle: 'Lịch sử rút gần đây', histEmpty: 'Chưa có khoản rút nào.',
     errInvalid: 'Nhập số tiền hợp lệ.', errInsufficient: 'Số dư không đủ.',
     okRequested: 'Đã gửi yêu cầu. Thanh toán trong 48 giờ trừ khi cần xem xét.',
+    lockedNote: '{n} π vẫn đang trong thời gian khóa an toàn 15 ngày, chưa thể rút.',
+    releaseIn: 'mở khóa sau {d} ngày',
+    releaseToday: 'mở khóa hôm nay',
     st: { requested: 'Đang chờ (48h)', processing: 'Đang xử lý', submitted: 'Trên blockchain', completed: 'Đã thanh toán', failed: 'Thất bại (đã hoàn)', blocked: 'Bị chặn (đã hoàn)' },
   },
 };
@@ -80,7 +96,7 @@ const STATUS_STYLE: Record<WStatus, { color: string; Icon: typeof Clock }> = {
   blocked:    { color: '#EF4444', Icon: XCircle },
 };
 
-export default function WithdrawCard({ balance }: { balance: number }) {
+export default function WithdrawCard({ balance, locked = 0 }: { balance: number; locked?: number }) {
   const { lang } = useLanguage();
   const s = STR[lang] || STR.en;
 
@@ -90,6 +106,7 @@ export default function WithdrawCard({ balance }: { balance: number }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [list, setList] = useState<Withdrawal[]>([]);
+  const [pending, setPending] = useState<{ _id: string; amount: number; releaseAt: string }[]>([]);
 
   const token = () => localStorage.getItem('workpiserv_token') || '';
   const display = Math.max(0, +(balance - reserved).toFixed(7));
@@ -102,7 +119,15 @@ export default function WithdrawCard({ balance }: { balance: number }) {
     } catch { /* silent */ }
   }, []);
 
-  useEffect(() => { fetchList(); }, [fetchList]);
+  const fetchPending = useCallback(async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/withdrawals/pending-releases`, { headers: apiHeaders({ Authorization: `Bearer ${token()}` }) });
+      if (!r.ok) { handleUnauthorized(r.status); return; }
+      setPending(await r.json());
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { fetchList(); fetchPending(); }, [fetchList, fetchPending]);
 
   const submit = async () => {
     setError(null); setSuccess(null);
@@ -123,6 +148,7 @@ export default function WithdrawCard({ balance }: { balance: number }) {
       setAmount('');
       setSuccess(s.okRequested);
       fetchList();
+      fetchPending();
     } catch {
       setError(s.errInvalid);
     }
@@ -142,9 +168,30 @@ export default function WithdrawCard({ balance }: { balance: number }) {
         <div>
           <p className="text-sm text-muted-foreground">{s.available}</p>
           <p className="font-heading font-bold text-2xl text-navy">{display} <span className="text-brand">π</span></p>
+          {locked > 0 && (
+            <p className="text-xs text-amber-600 mt-1">{s.lockedNote.replace('{n}', String(locked))}</p>
+          )}
         </div>
         <p className="text-xs text-muted-foreground">{s.min}: {MIN_WITHDRAWAL} π</p>
       </div>
+
+      {pending.length > 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 space-y-1.5">
+          {pending.map(p => {
+            const daysLeft = Math.max(0, Math.ceil((new Date(p.releaseAt).getTime() - Date.now()) / 86400000));
+            return (
+              <div key={p._id} className="flex items-center justify-between text-xs">
+                <span className="text-amber-800">{p.amount} π</span>
+                <span className="text-amber-600">
+                  {daysLeft > 0
+                    ? s.releaseIn.replace('{d}', String(daysLeft))
+                    : s.releaseToday}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="flex gap-2">
         <input
