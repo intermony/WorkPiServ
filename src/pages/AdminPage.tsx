@@ -108,7 +108,18 @@ export default function AdminPage() {
   });
 
   const token = () => localStorage.getItem('workpiserv_token') || '';
-  const isAdmin = user?.username === 'alibentaher';
+  // ⚠️ CORRECTIF (05/09/2026) : vérifie le rôle (source de vérité backend,
+  // /api/auth/me) plutôt que le pseudo en dur — cohérent avec le correctif
+  // équivalent déjà fait côté backend (promotion admin par pi_uid, pas par
+  // pi_username). Pas un bug de sécurité actif (aucune autre personne ne
+  // porte ce pseudo aujourd'hui), juste une amélioration de robustesse.
+  const isAdmin = user?.role === 'admin';
+
+  useEffect(() => {
+    if (loggedIn && !isAdmin) {
+      navigate('/', { replace: true });
+    }
+  }, [loggedIn, isAdmin, navigate]);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
