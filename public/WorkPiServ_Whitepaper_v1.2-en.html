@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WorkPiServ — Whitepaper v1.2</title>
+<meta name="description" content="WorkPiServ whitepaper: architecture, wallet sovereignty, escrow flow, the 15-day safety period, security and fraud detection.">
+<link rel="canonical" href="https://workpiserv.com/WorkPiServ_Whitepaper_v1.2-en.html">
+<link rel="alternate" hreflang="fr" href="https://workpiserv.com/WorkPiServ_Whitepaper_v1.2.html">
+<link rel="alternate" hreflang="en" href="https://workpiserv.com/WorkPiServ_Whitepaper_v1.2-en.html">
+<link rel="alternate" hreflang="x-default" href="https://workpiserv.com/WorkPiServ_Whitepaper_v1.2-en.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent:        #0F766E;   /* teal fort : textes et aplats avec texte blanc */
+    --accent-bright: #14B8A6;   /* teal accent : filets et décorations */
+    --accent-bg:     #ECFDF5;
+    --dark:    #0F172A;
+    --navy:    #334155;
+    --navy2:   #1E293B;
+    --light:   #F1F5F9;
+    --bg:      #F8FAFC;
+    --gray:    #475569;
+    --white:   #FFFFFF;
+    --green:   #15803D;
+    --blue:    #2563EB;
+    --yellow:  #F59E0B;
+    --red:     #DC2626;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    line-height: 1.6;
+  }
+
+  /* ── TOP NAV ── */
+  nav {
+    background: var(--white);
+    padding: 0.8rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 1.25rem; font-weight: 700; color: var(--dark);
+  }
+  .logo-icon {
+    background: var(--accent);
+    color: var(--white);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1rem;
+  }
+  .logo span { color: var(--accent); }
+  .nav-tag {
+    background: var(--accent);
+    color: var(--white);
+    font-size: 0.75rem; font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--bg) 0%, #E4F3E8 60%, var(--accent-bg) 100%);
+    color: var(--dark);
+    text-align: center;
+    padding: 5rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    font-size: 28rem;
+    font-weight: 900;
+    color: rgba(20,184,166,0.06);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    pointer-events: none;
+    line-height: 1;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(232,98,26,0.2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.8rem; font-weight: 700;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: #475569;
+    max-width: 600px;
+    margin: 1rem auto 2.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    font-size: 0.85rem;
+    color: #475569;
+  }
+  .hero-meta-item strong { color: var(--accent); }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--white);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 1.5rem 2rem;
+    max-width: 700px;
+    margin: 2rem auto;
+  }
+  .toc h2 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .toc ol {
+    padding-left: 1.2rem;
+  }
+  .toc li {
+    margin: 0.4rem 0;
+  }
+  .toc a {
+    color: var(--dark);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+  }
+  .toc a:hover { color: var(--accent); }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 16px rgba(15,23,42,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .section::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light);
+  }
+  .section-num {
+    background: var(--accent);
+    color: var(--white);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--dark);
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  p {
+    color: var(--dark);
+    margin-bottom: 0.75rem;
+    font-size: 0.97rem;
+  }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 1rem 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  thead tr {
+    background: var(--accent);
+    color: var(--white);
+  }
+  thead th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 700;
+  }
+  tbody tr:nth-child(even) { background: var(--light); }
+  tbody tr:nth-child(odd)  { background: var(--white); }
+  tbody td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #E2E8F0;
+    vertical-align: middle;
+  }
+  .ok  { color: var(--green); font-weight: 700; }
+  .no  { color: var(--red);   font-weight: 700; }
+  .warn{ color: var(--accent);font-weight: 700; }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: var(--white);
+    color: var(--dark);
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid #E2E8F0;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: var(--accent-bg);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.2rem 0;
+  }
+  .callout.security {
+    background: #F0FDFA;
+    border-color: var(--accent);
+  }
+  .callout-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .callout p { margin: 0; font-weight: 600; }
+  .callout strong { color: var(--accent); }
+
+  /* ── SECURITY BOX ── */
+  .security-box {
+    background: var(--white);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--dark);
+  }
+  .security-box .lock { font-size: 2.5rem; margin-bottom: 1rem; }
+  .security-box h3 { color: var(--accent); font-size: 1.1rem; margin: 0 0 0.75rem; }
+  .security-box p { color: #475569; font-size: 0.95rem; margin: 0; }
+
+  /* ── WALLET DIAGRAM ── */
+  .wallet-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 1.5rem 0;
+  }
+  .wallet-box {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+  }
+  .wallet-box.pi {
+    background: var(--white);
+    border: 2px solid var(--accent);
+    color: var(--dark);
+  }
+  .wallet-box.wps {
+    background: #EFF6FF;
+    border: 2px solid var(--blue);
+    color: var(--dark);
+  }
+  .wallet-box .wlabel {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .wallet-box .wname {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .wallet-box ul {
+    list-style: none;
+    font-size: 0.85rem;
+    color: #475569;
+    text-align: left;
+  }
+  .wallet-box ul li::before { content: '› '; color: var(--accent); }
+  .wallet-box.wps .wlabel { color: var(--blue); }
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: var(--accent);
+    padding: 0.25rem 0;
+    font-weight: 700;
+  }
+  .flow-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    background: var(--light);
+    padding: 0.2rem 0.8rem;
+    border-radius: 12px;
+    margin: -0.1rem 0;
+  }
+
+  /* ── STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0.75rem; margin: 1rem 0; }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--light);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+  }
+  .step-num {
+    background: var(--accent);
+    color: var(--white);
+    font-weight: 900;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    flex-shrink: 0;
+    min-width: 42px;
+    text-align: center;
+  }
+  .step-num.green { background: var(--green); }
+  .step-num.warn  { background: #F59E0B; }
+  .step-content strong { display: block; font-size: 0.9rem; color: var(--dark); }
+  .step-content span { font-size: 0.85rem; color: var(--gray); }
+
+  /* ── BADGES LANGUE ── */
+  .lang-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .lang-badge {
+    background: var(--white);
+    color: var(--dark);
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid #E2E8F0;
+  }
+  .lang-badge span { color: var(--accent); }
+
+  /* ── ROADMAP ── */
+  .roadmap { display: flex; flex-direction: column; gap: 0.75rem; }
+  .road-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    background: var(--light);
+  }
+  .road-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    min-width: 100px;
+    text-align: center;
+  }
+  .road-status.done    { background:#F0FDF4; color:var(--green); }
+  .road-status.ongoing { background:#FFFBEB; color:#B45309; }
+  .road-status.coming  { background:#F1F5F9; color:var(--gray); }
+  .road-desc { font-size: 0.9rem; color: var(--dark); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--white);
+    color: #475569;
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-top: 3px solid var(--accent);
+    margin-top: 3rem;
+  }
+  footer .ft-logo {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+  }
+  footer .ft-logo span { color: var(--accent); }
+  footer p { font-size: 0.85rem; margin: 0.25rem 0; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .section { padding: 1.5rem 1.25rem; }
+    .hero { padding: 3rem 1.25rem 2.5rem; }
+    .hero h1 { font-size: 1.8rem; }
+  }
+
+  /* ── Corporate Trust : surcharges ── */
+  h3, .hero h1, .section-title, .logo, .ft-logo, .toc h2 { font-family: 'Sora', system-ui, sans-serif; }
+  nav { background: var(--dark); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .logo { color: #F8FAFC; }
+  .logo-icon { background: var(--accent-bright); color: var(--dark); }
+  .hero {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #0F2D2B 100%);
+    color: #F8FAFC;
+    border-bottom: 0;
+  }
+  .hero h1 { color: #F8FAFC; }
+  .hero h1 span { color: var(--accent-bright); }
+  .hero-badge { background: rgba(20,184,166,0.15); border: 1px solid rgba(20,184,166,0.3); color: #5EEAD4; }
+  .hero-sub { color: #CBD5E1; }
+  .hero-meta-item { color: #94A3B8; }
+  .hero-meta-item strong { color: #5EEAD4; }
+  .section::before { background: var(--accent-bright); }
+  .toc { border-left-color: var(--accent-bright); }
+  .step-num.warn { color: var(--dark); }
+  footer { background: var(--dark); color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.06); }
+  footer .ft-logo { color: #F8FAFC; }
+  footer a { color: #5EEAD4; }
+  nav { flex-wrap: wrap; row-gap: 0.5rem; }
+  .nav-right { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
+  .langsw { color: #CBD5E1; font-size: 0.85rem; text-decoration: none; border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 0.25rem 0.7rem; white-space: nowrap; }
+  .langsw:hover { color: #F8FAFC; border-color: rgba(255,255,255,0.5); }
+  .nav-tag, .logo { white-space: nowrap; }
+  @media (max-width: 600px) { nav { padding: 0.8rem 1rem; } .nav-tag { font-size: 0.68rem; padding: 0.25rem 0.6rem; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">W</div>
+    WorkPiServ
+  </div>
+  <div class="nav-right"><a class="langsw" href="/WorkPiServ_Whitepaper_v1.2.html" hreflang="fr" lang="fr">Français</a><span class="nav-tag">WHITEPAPER v1.2</span></div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Official document — 2026</div>
+  <h1>WorkPiServ<br/><span>Whitepaper</span></h1>
+  <p class="hero-sub">A secure freelance marketplace for the Pi Network ecosystem — Architecture, Security and Escrow Transaction Flows</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><strong>Version</strong> 1.2</div>
+    <div class="hero-meta-item"><strong>Site</strong> workpiserv.com</div>
+    <div class="hero-meta-item"><strong>Ecosystem</strong> Pi Network</div>
+    <div class="hero-meta-item"><strong>Year</strong> 2026</div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="container">
+<div class="toc">
+  <h2>📋 Contents</h2>
+  <ol>
+    <li><a href="#vision">Vision</a></li>
+    <li><a href="#wallets">Principle of Sovereignty — Wallets</a></li>
+    <li><a href="#escrow">Escrow Transaction Flow</a></li>
+    <li><a href="#statuts">Order Statuses</a></li>
+    <li><a href="#economie">Business Model</a></li>
+    <li><a href="#securite">Security, Fraud and Transparency</a></li>
+    <li><a href="#messagerie">Messaging and Pioneer Profile</a></li>
+    <li><a href="#langues">Languages and Accessibility</a></li>
+    <li><a href="#roadmap">Status and Roadmap</a></li>
+  </ol>
+</div>
+
+<!-- ─── 1. VISION ─── -->
+<div class="section" id="vision">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">Vision</div>
+  </div>
+  <p>WorkPiServ is a secure freelance marketplace for the Pi Network ecosystem, allowing Pioneers to exchange professional services in Pi in a transparent and secure way.</p>
+  <p>The platform rests on three core pillars:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">🤝</div>
+      <div class="step-content">
+        <strong>Trust</strong>
+        <span>Between client and freelancer, thanks to the built-in escrow system</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">🔑</div>
+      <div class="step-content">
+        <strong>Sovereignty</strong>
+        <span>Full control by the Pioneer over their native Pi — WorkPiServ never accesses it</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">📋</div>
+      <div class="step-content">
+        <strong>Transparency</strong>
+        <span>Of every transaction, with complete logs and documented arbitration</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 2. WALLETS ─── -->
+<div class="section" id="wallets">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">Principle of Sovereignty — Wallets</div>
+  </div>
+
+  <h3>2.1 The two wallet layers</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Wallet</th><th>Definition</th><th>Control</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Native Pi Wallet</strong></td>
+          <td>The original wallet in the Pi Network app where the Pioneer receives their mined Pi</td>
+          <td>Pi Network exclusively</td>
+        </tr>
+        <tr>
+          <td><strong>Internal Balance (Ledger)</strong></td>
+          <td>An accounting entry kept by WorkPiServ for each Pioneer — <em>not a blockchain wallet</em>, only a number in a database representing what is owed to them</td>
+          <td>WorkPiServ platform</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>2.2 Wallet diagram</h3>
+  <div class="wallet-flow">
+    <div class="wallet-box pi">
+      <div class="wlabel">Pi Network app (official)</div>
+      <div class="wname">🔐 Pioneer's Native Pi Wallet</div>
+      <ul>
+        <li>Mined Pi is received here</li>
+        <li>Public address known to WorkPiServ</li>
+        <li>Seed phrase: exclusively owned by the Pioneer</li>
+      </ul>
+    </div>
+    <div class="flow-arrow">⬇</div>
+    <div class="flow-label">Voluntary transfer via the Pi Browser SDK</div>
+    <div class="flow-arrow">⬇</div>
+    <div class="wallet-box wps">
+      <div class="wlabel">WorkPiServ Platform</div>
+      <div class="wname">📂 WorkPiServ Internal Balance (Ledger)</div>
+      <ul>
+        <li>Available balance</li>
+        <li>Escrow balance (locked during a transaction)</li>
+        <li>Transaction history</li>
+        <li>⚠️ The real Pi pass through the platform's single wallet — the Pioneer has no blockchain wallet of their own on WorkPiServ</li>
+      </ul>
+    </div>
+    <div class="flow-arrow">⬇</div>
+    <div class="flow-label">Withdrawal to native wallet</div>
+    <div class="flow-arrow">⬇</div>
+    <div class="wallet-box pi">
+      <div class="wlabel">Pi Network app (official)</div>
+      <div class="wname">🔐 Pioneer's Native Pi Wallet</div>
+      <ul><li>Withdrawn Pi is received here</li></ul>
+    </div>
+  </div>
+
+  <h3>2.3 Absolute security commitment — Seed Phrase</h3>
+  <div class="security-box">
+    <div class="lock">🔒</div>
+    <h3>WorkPiServ stores NO seed phrase</h3>
+    <p>
+      Not that of the Pioneer's native Pi wallet,<br/>
+      nor that of any other wallet declared on the platform.<br/><br/>
+      WorkPiServ stores only the <strong style="color:var(--accent)">public Pi address</strong> — never private data.
+    </p>
+  </div>
+
+  <h3>2.4 What WorkPiServ stores, and what it does not</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Data</th><th>Stored?</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Public Pi address</td><td class="ok">✓ YES</td><td>To send/receive Pi</td></tr>
+        <tr><td>Seed phrase (native wallet)</td><td class="no">✗ NEVER</td><td>Exclusively owned by the Pioneer</td></tr>
+        <tr><td>Seed phrase (any other wallet)</td><td class="no">✗ NEVER</td><td>WorkPiServ has no access to it</td></tr>
+        <tr><td>Private key</td><td class="no">✗ NEVER</td><td>Exclusively owned by the Pioneer</td></tr>
+        <tr><td>WPS internal balance</td><td class="ok">✓ YES</td><td>Platform escrow management</td></tr>
+        <tr><td>WPS transaction history</td><td class="ok">✓ YES</td><td>Audit and transparency</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── 3. ESCROW ─── -->
+<div class="section" id="escrow">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">Escrow Transaction Flow</div>
+  </div>
+
+  <h3>3.1 Steps of a transaction</h3>
+  <p style="margin-bottom:1rem;color:#475569;font-size:0.9rem;">Two kinds of movement coexist in this flow: <strong style="color:var(--accent)">real blockchain transactions</strong> ⛓️ (the Pi physically move) and <strong style="color:var(--blue)">internal accounting entries</strong> 📒 (a number simply changes in the WorkPiServ ledger; no Pi move).</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1 ⛓️</div>
+      <div class="step-content">
+        <strong>TOP-UP — Real blockchain transaction</strong>
+        <span>The Pioneer sends Pi from their native wallet to WorkPiServ's single on-chain wallet, via the Pi Browser SDK. The backend then credits their internal balance (ledger) with the amount received.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue)">2 📒</div>
+      <div class="step-content">
+        <strong>ORDER — Accounting entry</strong>
+        <span>The client uses their internal balance to order a service. No Pi move: the amount is simply marked "locked in escrow" in the ledger. The Pi stay safe, physically in WorkPiServ's single wallet since step 1.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--blue)">3 📒</div>
+      <div class="step-content">
+        <strong>DELIVERY — Accounting entry</strong>
+        <span>The freelancer delivers the service. The client is notified to validate it. No financial movement at this step.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">4A ✅</div>
+      <div class="step-content">
+        <strong>VALIDATION — Satisfied client (accounting entry)</strong>
+        <span>The client approves the release. The ledger splits the amount: 90% credited to the freelancer's internal balance, 10% to the WorkPiServ commission balance. The Pi always stay in the single wallet — this is the start of the safety period.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num warn">4B ⚠️</div>
+      <div class="step-content">
+        <strong>DISPUTE — Unsatisfied client</strong>
+        <span>Dispute opened. The Pi stay frozen in escrow (still in the single wallet) until WorkPiServ issues a transparent, documented ruling.</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:var(--yellow);color:var(--dark)">5 🛡️</div>
+      <div class="step-content">
+        <strong>SAFETY PERIOD — 15 days</strong>
+        <span>After validation (4A), the freelancer's earnings are automatically locked for 15 days before any withdrawal. The server applies this period every time funds are released, whatever the route (client validation, automatic validation, arbitration). It is a protection against late disputes, in line with freelance-market standards (see 3.3).</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6 ⛓️</div>
+      <div class="step-content">
+        <strong>WITHDRAWAL — Real blockchain transaction</strong>
+        <span>Once the 15-day period has passed, the freelancer can request a withdrawal. A 48-hour review period (anti-fraud) precedes the payout, then WorkPiServ issues a real A2U payment from its single wallet to the freelancer's Pi account.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>3.2 Technical diagram</h3>
+  <pre>CLIENT (native Pi Network wallet)
+    │
+    │  ⛓️ BLOCKCHAIN TRANSACTION — Pi Browser SDK
+    ▼
+╔═══════════════════════════════════════════╗
+║  SINGLE ON-CHAIN WORKPISERV WALLET        ║
+║  (the only real wallet)                   ║
+║  The Pi of ALL Pioneers pass through it   ║
+╚═══════════════════════════════════════════╝
+    │
+    │  📒 LEDGER ENTRY (no Pi move)
+    │     Client internal balance: +10 π available
+    ▼
+ORDER — Purchase of a 2 π service
+    │
+    │  📒 LEDGER ENTRY
+    │     Client balance: -2 π  →  Escrow locked: +2 π
+    ▼
+WORKPISERV ESCROW [2 π locked — still in the single wallet]
+    │
+    │  📒 Client validates ✅ (LEDGER ENTRY)
+    │     Freelancer internal balance: +1.8 π (90%)
+    │     WPS commission balance   : +0.2 π (10%)
+    ▼
+🛡️ SAFETY PERIOD — 15 DAYS
+    (Pi still physically in WorkPiServ's single wallet)
+    │
+    │  ⛓️ BLOCKCHAIN TRANSACTION — Real A2U payment
+    ▼
+NATIVE Pi Network WALLET — Freelancer
+    (address set in their profile)</pre>
+
+  <h3>3.3 The 15-day safety period — why, and how it compares</h3>
+  <p>WorkPiServ applies a 15-day period between the validation of an order and the availability of withdrawal. This is not a technical constraint — it is a design choice that protects both the freelancer and the client against late disputes, and it sits in the same range as industry standards:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Platform</th><th>Safety period</th></tr></thead>
+      <tbody>
+        <tr><td>Fiverr (new seller)</td><td>14 days after approval</td></tr>
+        <tr><td>Fiverr (Top Rated seller)</td><td>7 days after approval</td></tr>
+        <tr><td>Upwork (fixed-price)</td><td>5 days after approval</td></tr>
+        <tr><td>Upwork (hourly)</td><td>10 days after the billed week</td></tr>
+        <tr><td><strong>WorkPiServ</strong></td><td><strong>15 days after validation</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <div class="callout-icon">💡</div>
+    <p><strong>Golden rule of escrow:</strong> WorkPiServ's single wallet physically holds the Pi of all Pioneers (available balances + active escrow). The internal ledger keeps the exact record of what belongs to whom. An automatic reconciliation periodically (every 6 hours) checks that the wallet holds at least as much Pi as the sum of all promised balances — see section 6.3.</p>
+  </div>
+</div>
+
+<!-- ─── 4. STATUTS ─── -->
+<div class="section" id="statuts">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">Order Statuses</div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Status</th><th>Description</th><th>Next action</th></tr></thead>
+      <tbody>
+        <tr><td><code>pending</code></td><td>Pi received in escrow</td><td>Freelancer delivers the service</td></tr>
+        <tr><td><code>delivered</code></td><td>Service delivered by the freelancer</td><td>Client validates or opens a dispute</td></tr>
+        <tr><td><code>completed</code></td><td class="ok">Client validates — payment released</td><td>90% freelancer / 10% WPS</td></tr>
+        <tr><td><code>completed</code> + safety period</td><td>🛡️ Funds credited to the freelancer's ledger, locked for 15 days</td><td>Withdrawal available after the period</td></tr>
+        <tr><td><code>disputed</code></td><td class="warn">Dispute opened by the client</td><td>WorkPiServ arbitrates</td></tr>
+        <tr><td><code>refunded</code></td><td>Refund granted</td><td>Pi returned to the client</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ─── 5. ECONOMIE ─── -->
+<div class="section" id="economie">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">Business Model</div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Flow</th><th>Amount</th><th>Destination</th></tr></thead>
+      <tbody>
+        <tr><td>Service price (total)</td><td><strong>100%</strong></td><td>WorkPiServ escrow (locked)</td></tr>
+        <tr><td>WorkPiServ commission</td><td class="warn"><strong>10%</strong></td><td>WorkPiServ operating wallet</td></tr>
+        <tr><td>Freelancer payment</td><td class="ok"><strong>90%</strong></td><td>Freelancer's WPS internal wallet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Concrete example — 2 π service</h3>
+  <pre>Service ordered: 2 π
+  │
+  ├──▶ 0.2 π  ──▶  WorkPiServ  (10% commission)
+  └──▶ 1.8 π  ──▶  Freelancer  (90% payment)
+
+Client: 10 π - 2 π = 8 π left on WPS wallet</pre>
+</div>
+
+<!-- ─── 6. SECURITE ─── -->
+<div class="section" id="securite">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">Security, Fraud and Transparency</div>
+  </div>
+
+  <h3>6.1 WorkPiServ commitments</h3>
+  <div class="steps">
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>ZERO access</strong><span>to Pioneers' native Pi wallets</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red)">✗</div><div class="step-content"><strong>ZERO seed phrase storage</strong><span>Neither native, nor any wallet declared on the platform</span></div></div>
+    <div class="step"><div class="step-num" style="background:var(--red)">✗</div><div class="step-content"><strong>ZERO private key storage</strong><span>No sensitive data retained</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Complete logs</strong><span>of all escrow transactions</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Automatic release</strong><span>if the client is inactive after a defined period</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Transparent arbitration</strong><span>documented in case of dispute</span></div></div>
+  </div>
+
+  <h3>6.2 Authentication via the Pi Network SDK</h3>
+  <p>Login to WorkPiServ is handled exclusively by the Pi Network SDK. WorkPiServ receives only the strictly necessary data.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Data received by WPS</th><th>Via SDK?</th><th>Sensitive?</th></tr></thead>
+      <tbody>
+        <tr><td>Pioneer uid</td><td class="ok">YES</td><td>No</td></tr>
+        <tr><td>Pi username</td><td class="ok">YES</td><td>No</td></tr>
+        <tr><td>Public Pi address</td><td class="ok">YES</td><td>No (public by nature)</td></tr>
+        <tr><td>Seed phrase</td><td class="no">NEVER</td><td class="no">YES — stays with the Pioneer</td></tr>
+        <tr><td>Private key</td><td class="no">NEVER</td><td class="no">YES — stays with the Pioneer</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>6.3 Fraud detection and on-chain reconciliation</h3>
+  <p>Since version 1.1, WorkPiServ includes an always-on fraud detection engine and a periodic solvency reconciliation system.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Detection engine</strong><span>7 behavior patterns monitored, with a severity threshold that triggers automatic flagging</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Administrator dashboard</strong><span>Consolidated view of flagged accounts for manual review before any action</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Solvency reconciliation</strong><span>Automatic periodic check that the platform wallet covers all funds held in escrow</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Append-only ledger</strong><span>Every balance movement is logged in an immutable, traceable and auditable way</span></div></div>
+  </div>
+
+  <h3>6.4 Consent and compliance</h3>
+  <p>Before using the platform, every Pioneer must explicitly accept the Terms through a versioned consent gate, available in French, English and Arabic (with native RTL support for Arabic). WorkPiServ also provides dedicated Privacy, Terms of Use and Cookies pages, translated into the same languages.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Versioned consent</strong><span>Any update to the Terms asks for the Pioneer's explicit agreement again</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Anti-phishing warning</strong><span>Explicit reminder: the 24-word secret phrase must never be entered on WorkPiServ, only in the official Pi Browser</span></div></div>
+  </div>
+</div>
+
+<!-- ─── 7. MESSAGERIE & PROFIL ─── -->
+<div class="section" id="messagerie">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">Messaging and Pioneer Profile</div>
+  </div>
+  <p>Communication between buyer and provider takes place directly within the platform, before, during and after the order — without ever leaving the secure WorkPiServ environment.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Built-in messaging</strong><span>Direct exchange between Pioneers, tied to each order</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Profile photo</strong><span>Avatar upload (JPG, PNG, WEBP — 2 MB max) to humanize each Pioneer profile</span></div></div>
+    <div class="step"><div class="step-num green">✓</div><div class="step-content"><strong>Public profile</strong><span>Service history, reviews and reputation visible to any Pioneer</span></div></div>
+  </div>
+</div>
+
+<!-- ─── 8. LANGUES ─── -->
+<div class="section" id="langues">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">Languages and Accessibility</div>
+  </div>
+  <p>WorkPiServ is available in 5 languages to reach the whole global Pi Network community:</p>
+  <div class="lang-badges">
+    <div class="lang-badge">🇬🇧 <span>EN</span> English</div>
+    <div class="lang-badge">🇫🇷 <span>FR</span> Français</div>
+    <div class="lang-badge">🇸🇦 <span>AR</span> العربية</div>
+    <div class="lang-badge">🇨🇳 <span>ZH</span> 中文</div>
+    <div class="lang-badge">🇻🇳 <span>VI</span> Tiếng Việt</div>
+  </div>
+</div>
+
+<!-- ─── 9. ROADMAP ─── -->
+<div class="section" id="roadmap">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div class="section-title">Status and Roadmap</div>
+  </div>
+  <div class="roadmap">
+    <div class="road-item">
+      <span class="road-status done">✓ COMPLETED</span>
+      <span class="road-desc"><strong>Phase 1</strong> — Platform development and deployment</span>
+    </div>
+    <div class="road-item">
+      <span class="road-status done">✓ COMPLETED</span>
+      <span class="road-desc"><strong>Phase 2</strong> — 5 A2U transactions validated, App Mainnet wallet submitted to the Pi Core Team, domain ownership verification completed</span>
+    </div>
+    <div class="road-item">
+      <span class="road-status done">✓ COMPLETED</span>
+      <span class="road-desc"><strong>Phase 3</strong> — Community pre-Mainnet phase: Pioneers tested, published services and sent feedback</span>
+    </div>
+    <div class="road-item">
+      <span class="road-status ongoing">● LIVE</span>
+      <span class="road-desc"><strong>Phase 4</strong> — Public launch on Mainnet — the platform is live. Pioneers are invited to use it with small amounts and share their feedback</span>
+    </div>
+    <div class="road-item">
+      <span class="road-status coming">○ UPCOMING</span>
+      <span class="road-desc"><strong>Phase 5</strong> — Pi ecosystem expansion — new features</span>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="callout-icon">💬</div>
+    <p><strong>Pioneers, your turn:</strong> try WorkPiServ with small amounts and share your feedback at <a href="mailto:WorkPiServ@gmail.com">WorkPiServ@gmail.com</a>. Every comment helps us improve the platform.</p>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-logo">WorkPiServ</div>
+  <p>A trusted freelance marketplace for the Pi Network ecosystem</p>
+  <p><a href="https://workpiserv.com">workpiserv.com</a> — <a href="https://workpiserv.com/trust.html">Transparency and trust</a> — Version 1.2 — 2026</p>
+  <p style="margin-top:1rem;font-size:0.75rem;">
+    🔒 WorkPiServ stores no seed phrase — neither native nor declared.
+  </p>
+</footer>
+
+</body>
+</html>
