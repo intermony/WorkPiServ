@@ -22,11 +22,21 @@ const communityLinks = [
   { label: 'footer.becomeFreelancer', href: '/create-service' },
   { label: 'footer.affiliate', href: '/affiliate' },
   // ── Whitepaper ── ouvre dans un nouvel onglet (fichier statique dans /public)
-  { label: 'footer.whitepaper', href: '/WorkPiServ_Whitepaper_v1.html', external: true },
+  { label: 'footer.whitepaper', href: '/WorkPiServ_Whitepaper_v1.2.html', external: true },
 ];
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const trustLinks: Record<string, { href: string; label: string }> = {
+    en: { href: '/trust.html', label: 'Transparency' },
+    fr: { href: '/trust-fr.html', label: 'Transparence' },
+    ar: { href: '/trust-ar.html', label: 'الشفافية' },
+    zh: { href: '/trust-zh.html', label: '透明度' },
+    vi: { href: '/trust-vi.html', label: 'Minh bạch' },
+  };
+  const trustLink = trustLinks[lang] ?? trustLinks.en;
+  // Livre blanc : version FR pour le français, version EN pour les autres langues
+  const whitepaperHref = lang === 'fr' ? '/WorkPiServ_Whitepaper_v1.2.html' : '/WorkPiServ_Whitepaper_v1.2-en.html';
   const navigate = useNavigate();
 
   return (
@@ -97,7 +107,7 @@ export function Footer() {
                   {'external' in link && link.external ? (
                     // Whitepaper → nouvel onglet
                     <a
-                      href={link.href}
+                      href={link.label === 'footer.whitepaper' ? whitepaperHref : link.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand transition-colors"
@@ -143,9 +153,19 @@ export function Footer() {
             >
               {t('footer.cookies')}
             </button>
+            {/* Page de transparence — un fichier statique par langue dans /public */}
+            <a
+              href={trustLink.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-brand transition-colors py-1"
+            >
+              <Shield size={13} />
+              {trustLink.label}
+            </a>
             {/* Whitepaper dans le bottom bar */}
             <a
-              href="/WorkPiServ_Whitepaper_v1.html"
+              href={whitepaperHref}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-sm text-brand hover:text-brand-hover transition-colors py-1 font-medium"
