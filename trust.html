@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transparency and trust | WorkPiServ</title>
+<meta name="description" content="Who runs WorkPiServ, where your Pi goes, what it costs, how it is protected and what its limits are. Verifiable facts, updated September 21, 2026.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://workpiserv.com/trust.html">
+<link rel="alternate" hreflang="en" href="https://workpiserv.com/trust.html">
+<link rel="alternate" hreflang="fr" href="https://workpiserv.com/trust-fr.html">
+<link rel="alternate" hreflang="ar" href="https://workpiserv.com/trust-ar.html">
+<link rel="alternate" hreflang="zh" href="https://workpiserv.com/trust-zh.html">
+<link rel="alternate" hreflang="vi" href="https://workpiserv.com/trust-vi.html">
+<link rel="alternate" hreflang="x-default" href="https://workpiserv.com/trust.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WorkPiServ">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Transparency and trust | WorkPiServ">
+<meta property="og:description" content="Operator, fees, escrow, withdrawals, disputes and limitations: everything to know before using WorkPiServ.">
+<meta property="og:url" content="https://workpiserv.com/trust.html">
+<meta property="og:image" content="https://workpiserv.com/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "WebPage", "name": "Transparency and trust — WorkPiServ", "url": "https://workpiserv.com/trust.html", "inLanguage": "en", "dateModified": "2026-09-21", "isPartOf": {"@type": "WebSite", "name": "WorkPiServ", "url": "https://workpiserv.com"}}
+</script>
+<style>
+  /* Corporate Trust Palette — valeurs exactes */
+  :root {
+    --wp-primary: #0F172A; --wp-secondary: #334155; --wp-accent: #14B8A6; --wp-cta: #0D9488; --wp-cta-strong: #0F766E;
+    --wp-highlight: #F59E0B; --wp-bg: #F8FAFC; --wp-surface: #FFFFFF; --wp-surface-alt: #F1F5F9; --wp-border: #E2E8F0;
+    --wp-warning-bg: #FFFBEB; --wp-text: #111827; --wp-text-secondary: #64748B; --wp-link: #0F766E;
+    --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-head: 'Sora', 'DM Sans', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --wp-bg: #020617; --wp-surface: #0F172A; --wp-surface-alt: #111827; --wp-border: #1F2937;
+      --wp-warning-bg: rgba(245,158,11,.1); --wp-text: #E5E7EB; --wp-text-secondary: #9CA3AF; --wp-link: #5EEAD4;
+    }
+  }
+  html[lang="ar"] {
+    --font-body: 'Noto Sans Arabic', 'DM Sans', system-ui, 'Segoe UI', Tahoma, sans-serif;
+    --font-head: 'Noto Sans Arabic', 'DM Sans', system-ui, 'Segoe UI', Tahoma, sans-serif;
+  }
+  html[lang="zh"] {
+    --font-body: 'DM Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+    --font-head: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'DM Sans', system-ui, sans-serif;
+  }
+  html[lang="ar"] *, html[lang="zh"] * { letter-spacing: 0 !important; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--wp-bg); color: var(--wp-text); font-family: var(--font-body); font-size: 16px; line-height: 1.65; }
+  html[lang="ar"] body, html[lang="zh"] body { line-height: 1.85; }
+  a { color: var(--wp-link); text-underline-offset: 3px; }
+  a:focus-visible { outline: 3px solid var(--wp-accent); outline-offset: 3px; border-radius: 4px; }
+
+  .top { background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #0F2D2B 100%); color: #F8FAFC; padding: 0 20px 44px; }
+  .top-in { max-width: 720px; margin: 0 auto; }
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 0 22px; }
+  .brand { font-family: 'Sora', system-ui, sans-serif; font-weight: 700; font-size: 1.25rem; color: #F8FAFC; text-decoration: none; letter-spacing: -.3px; direction: ltr; unicode-bidi: isolate; }
+  .brand span { color: var(--wp-accent); }
+  .nav a.back { color: #CBD5E1; font-size: .9rem; }
+  .langs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 34px; }
+  .langs a, .langs span {
+    font-size: .85rem; line-height: 1; padding: 8px 14px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.22); color: #CBD5E1; text-decoration: none;
+  }
+  .langs a:hover { border-color: rgba(255,255,255,.5); color: #F8FAFC; }
+  .langs span[aria-current] { background: rgba(20,184,166,.18); border-color: rgba(20,184,166,.5); color: #5EEAD4; font-weight: 600; }
+  h1 { font-family: var(--font-head); font-weight: 700; font-size: clamp(1.7rem, 5.5vw, 2.5rem); line-height: 1.25; letter-spacing: -.5px; margin-bottom: 14px; max-width: 20ch; }
+  html[lang="zh"] h1, html[lang="ar"] h1 { max-width: 24em; }
+  .lede { color: #CBD5E1; font-size: 1.05rem; max-width: 58ch; margin-bottom: 10px; }
+  html[lang="zh"] .lede { max-width: 32em; }
+  .stamp { color: #94A3B8; font-size: .875rem; }
+
+  main { max-width: 720px; margin: 0 auto; padding: 44px 20px 72px; }
+  h2 { font-family: var(--font-head); font-weight: 600; font-size: 1.25rem; line-height: 1.4; letter-spacing: -.2px; margin: 48px 0 12px; padding-top: 22px; border-top: 1px solid var(--wp-border); }
+  h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+  p { margin-bottom: 14px; max-width: 65ch; }
+  ul { margin: 0 0 14px; padding-inline-start: 1.2em; max-width: 65ch; }
+  li { margin-bottom: 7px; }
+  html[lang="zh"] p, html[lang="zh"] ul { max-width: 38em; }
+  .muted { color: var(--wp-text-secondary); }
+
+  .flow { list-style: none; padding: 0; margin: 18px 0 8px; max-width: none; counter-reset: s; }
+  .flow li {
+    counter-increment: s; position: relative; background: var(--wp-surface); border: 1px solid var(--wp-border);
+    border-inline-start: 4px solid var(--wp-cta); border-radius: 10px;
+    padding: 14px 16px; padding-inline-start: 56px; margin-bottom: 10px;
+  }
+  .flow li::before {
+    content: counter(s); position: absolute; inset-inline-start: 15px; top: 14px; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--wp-cta-strong); color: #fff; font-family: 'Sora', sans-serif; font-weight: 600; font-size: .85rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .flow strong { display: block; font-weight: 600; }
+  .flow span { color: var(--wp-text-secondary); font-size: .95rem; }
+  html[lang="ar"] .flow span, html[lang="zh"] .flow span { color: var(--wp-text-secondary); }
+
+  .table-wrap { overflow-x: auto; margin: 12px 0 16px; }
+  table { width: 100%; border-collapse: collapse; background: var(--wp-surface); border: 1px solid var(--wp-border); font-size: .95rem; }
+  th, td { text-align: start; padding: 11px 14px; border-bottom: 1px solid var(--wp-border); vertical-align: top; }
+  th { background: var(--wp-surface-alt); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+
+  .limits { background: var(--wp-warning-bg); border: 1px solid var(--wp-highlight); border-radius: 10px; padding: 18px 20px 6px; margin: 12px 0 16px; }
+  .limits ul { margin-bottom: 12px; }
+
+  footer { background: var(--wp-primary); color: #94A3B8; padding: 28px 20px; font-size: .875rem; }
+  .foot-in { max-width: 720px; margin: 0 auto; }
+  footer a { color: #CBD5E1; margin-inline-end: 16px; }
+  .foot-brand { font-family: 'Sora', sans-serif; font-weight: 700; color: #F8FAFC; margin-bottom: 8px; direction: ltr; unicode-bidi: isolate; text-align: start; }
+  .foot-brand span { color: var(--wp-accent); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="nav">
+      <a class="brand" href="/">Work<span>Pi</span>Serv</a>
+      <a class="back" href="/">Back to the app</a>
+    </div>
+    <nav class="langs" aria-label="Language">
+        <span aria-current="page" lang="en">English</span>
+        <a href="/trust-fr.html" hreflang="fr" lang="fr">Français</a>
+        <a href="/trust-ar.html" hreflang="ar" lang="ar">العربية</a>
+        <a href="/trust-zh.html" hreflang="zh" lang="zh">中文</a>
+        <a href="/trust-vi.html" hreflang="vi" lang="vi">Tiếng Việt</a>
+    </nav>
+    <h1>Who is behind WorkPiServ, and where your Pi goes</h1>
+    <p class="lede">The verifiable facts about the operator, the escrow, the fees and the safeguards, along with what WorkPiServ is not yet.</p>
+    <p class="stamp">Last updated: September 21, 2026</p>
+  </div>
+</header>
+
+<main>
+  <h2 id="operator">Who runs WorkPiServ</h2>
+  <p>WorkPiServ is built and run by its founder, Ali (@alibentaher on Pi Network, <strong>intermony</strong> on GitHub), from Tunisia.</p>
+  <p>The legal structure of the business is still being defined. It will be published here as soon as it exists.</p>
+  <p>Contact: <a href="mailto:WorkPiServ@gmail.com"><bdi>WorkPiServ@gmail.com</bdi></a></p>
+
+  <h2 id="flow">Where your Pi goes</h2>
+  <p>WorkPiServ uses a single on-chain wallet to hold the platform's Pi. An internal ledger records what belongs to each Pioneer. Here is the path of an order:</p>
+  <ol class="flow">
+    <li>
+      <strong>The client pays in Pi</strong>
+      <span>Payment goes through the Pi Browser and the Pi SDK. The amount is calculated on the server and checked with the Pi API, never taken from the browser.</span>
+    </li>
+    <li>
+      <strong>Pi stays in escrow</strong>
+      <span>The freelancer works and delivers. Until the order is validated, the funds do not belong to them.</span>
+    </li>
+    <li>
+      <strong>The client validates, or the order closes on its own</strong>
+      <span>On validation, 90% goes to the freelancer and 10% to WorkPiServ. If the client does not respond within 5 days of delivery, the order is validated automatically.</span>
+    </li>
+    <li>
+      <strong>15-day safety period</strong>
+      <span>After validation, the freelancer's earnings are locked for 15 days before any withdrawal. This protects against late disputes. The server applies it every time funds are released, whatever the route (validation, automatic validation, arbitration).</span>
+    </li>
+    <li>
+      <strong>The freelancer requests a withdrawal</strong>
+      <span>Once the 15 days have passed, they can request a withdrawal. A 48-hour review period applies (anti-fraud), then the payment is sent automatically to their Pi account. Minimum withdrawal: 0.5 π.</span>
+    </li>
+  </ol>
+
+  <h2 id="fees">Fees</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Item</th><th>Amount</th><th>When and how</th></tr></thead>
+      <tbody>
+        <tr><td>WorkPiServ commission</td><td>10% of the order price</td><td>Taken from the escrowed amount, on validation</td></tr>
+        <tr><td>Other WorkPiServ fees</td><td>None</td><td>Not applicable</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Example: a 2 π service gives 1.8 π to the freelancer and 0.2 π to WorkPiServ.</p>
+
+  <h2 id="disputes">When things go wrong</h2>
+  <ul>
+    <li><strong>Service never delivered:</strong> the client can request a refund after 7 days.</li>
+    <li><strong>Freelancer unable to deliver:</strong> they can cancel, and the client is refunded.</li>
+    <li><strong>Disagreement:</strong> either party can open a dispute. Funds are frozen and the team arbitrates: refund to the client or release to the freelancer. Every decision is logged.</li>
+  </ul>
+
+  <h2 id="never">What WorkPiServ never does</h2>
+  <ul>
+    <li>Never asks for, receives or stores your 24-word secret phrase or your private key. It is entered only in the official Pi Browser.</li>
+    <li>Keeps only what the Pi SDK provides: Pioneer identifier, username and public address.</li>
+    <li>Never asks you to pay outside the platform. Any request to pay through Telegram, WhatsApp or another channel is a scam attempt: report it.</li>
+  </ul>
+
+  <h2 id="controls">Safeguards in place</h2>
+  <ul>
+    <li><strong>Append-only ledger:</strong> every balance movement is recorded with the balance before and after, and cannot be edited or deleted.</li>
+    <li><strong>Integer amounts:</strong> balances are kept in whole units (1 π = 10,000,000 µπ), so rounding errors never build up.</li>
+    <li><strong>Automatic reconciliation:</strong> every 6 hours, the system checks that the wallet covers all balances and escrowed funds, and raises an alert on any gap.</li>
+    <li><strong>Fraud detection:</strong> 7 suspicious behaviors are monitored (buying from yourself, repeated back-and-forth trades, accounts linked to the same wallet, and more). Flagged accounts are reviewed.</li>
+    <li><strong>Versioned terms:</strong> every update to the terms requires your explicit consent before any payment or withdrawal.</li>
+    <li><strong>Testnet and Mainnet kept apart:</strong> separate databases, servers and accounts. Testnet Pi has no value.</li>
+    <li><strong>Application security:</strong> HTTPS, content security policy, request rate limiting, and Pi identity checked on the server at every login.</li>
+  </ul>
+  <p>For the technical detail, see the <a href="/WorkPiServ_Whitepaper_v1.2-en.html">whitepaper</a>. The terms of use, privacy policy and cookie policy are available from the footer of the application.</p>
+
+  <h2 id="limits">What WorkPiServ is not (yet)</h2>
+  <div class="limits">
+    <ul>
+    <li>WorkPiServ is an independent application. It is neither affiliated with nor endorsed by Pi Network or the Pi Core Team.</li>
+    <li>It has not obtained Pi KYB verification to date.</li>
+    <li>No independent security audit has been carried out yet.</li>
+    <li>The operator is not yet a registered company (see above).</li>
+    <li>A blockchain transaction cannot be reversed. For a first order, start with a small amount.</li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <div class="foot-brand">Work<span>Pi</span>Serv</div>
+    <a href="/">App</a>
+    <a href="/WorkPiServ_Whitepaper_v1.2-en.html">Whitepaper</a>
+    <a href="/guide.html">Guide</a>
+  </div>
+</footer>
+
+</body>
+</html>
